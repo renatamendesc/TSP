@@ -1,8 +1,85 @@
-#include <iostream>
-using namespace std;
-
 #include "data.h"
 #include "hungarian.h"
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+double ** matrizReal;
+double ** matrizModificada;
+int dimension;
+
+typedef struct {
+
+	vector <pair <int, int>> arcosProibidos; // Lista de arcos que foram proibidos
+	vector <vector <int>> subtours; // Lista de subtours gerados pela solução do algoritmo húngaro
+
+	double lowerBound; // Resultado da solução gerada pelo algoritmo húngaro
+	int escolhido; // Subtour escolhido que terá arcos proibidos
+	bool podar; // Indica se o nó deve gerar filhos
+
+} Node;
+
+void formaSubtours(hungarian_problem_t *p, Node &node){
+	vector <int> listaCandidatos;
+	vector <int> subtour;
+
+	// Forma lista de candidatos
+	for(int i = 0; i < dimension; i++){
+		listaCandidatos.push_back(i+1);
+	}
+
+	// Forma solução de subtours
+	while(!listaCandidatos.empty()){
+		int i = listaCandidatos[0]-1; 
+		int inicio = i;
+		subtour.push_back(inicio + 1);
+
+		while(true){
+			// Apaga nó em questão da lista de candidatos
+			for(int j = 0; j < listaCandidatos.size(); j++){
+				if(listaCandidatos[j] == i+1){
+					listaCandidatos.erase(listaCandidatos.begin() + j);
+				}
+			}
+
+			// Verifica existência do arco
+			for(int j = 0; j < dimension; j++){
+				if(p->assignment[i][j]){
+					subtour.push_back(j+1);
+					i = j;
+					break;
+				}
+			}
+
+			// Encerra percurso do subtour
+			if(inicio == i){
+				node.subtours.push_back(subtour);
+				subtour.clear();
+
+				break;
+			}
+		}
+	}
+}
+
+void branchAndBound(){
+
+	vector <Node> arvore;
+	Node raiz;
+
+	hungarian_problem_t p;
+	int mode = HUNGARIAN_MODE_MINIMIZE_COST;
+	hungarian_init(&p, matrizModificada, dimension, dimension, mode); // Carregando o problema
+
+	raiz.lowerBound = hungarian_solve(&p);
+	arvore.push_back(raiz);
+
+	formaSubtours(&p, raiz);
+
+	hungarian_free(&p);
+
+}
 
 int main(int argc, char** argv) {
 
@@ -17,23 +94,15 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	hungarian_problem_t p;
-	int mode = HUNGARIAN_MODE_MINIMIZE_COST;
-	hungarian_init(&p, cost, data->getDimension(), data->getDimension(), mode); // Carregando o problema
+	matrizReal = cost;
+	matrizModificada = cost;
+	dimension = data->getDimension();
 
-	double obj_value = hungarian_solve(&p);
-	cout << "Obj. value: " << obj_value << endl;
+	branchAndBound();
 
-	cout << "Assignment" << endl;
-	hungarian_print_assignment(&p);
-
-	hungarian_free(&p);
 	for (int i = 0; i < data->getDimension(); i++) delete [] cost[i];
 	delete [] cost;
 	delete data;
-
-	cout << "Dimension: " << data->getDimension() << endl;
-	cout << "Distancia: " << data->getDistance(1, 5) << endl;
 
 	return 0;
 }
