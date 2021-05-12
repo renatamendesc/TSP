@@ -2,8 +2,11 @@
 #include "hungarian.h"
 #include <iostream>
 #include <vector>
+#include <climits>
 
 using namespace std;
+
+#define INFINITO 99999999
 
 double ** matrizReal;
 double ** matrizModificada;
@@ -19,6 +22,46 @@ typedef struct {
 	bool podar; // Indica se o nó deve gerar filhos
 
 } Node;
+
+void proibeArcos(Node &node){
+
+	// Define os arcos proibidos
+	for(int i = 0; i < node.arcosProibidos.size(); i++){
+
+		// Adiciona restrição referente aos arcos proibidos
+		matrizModificada[node.arcosProibidos[i].first-1][node.arcosProibidos[i].second-1] = INFINITO;
+		
+	}
+}
+
+void procuraArcosProibidos(Node &node){
+	int menorSubtour = INT_MAX;
+
+	if(node.subtours.size() == 1){
+		node.podar = true;
+
+	}else{
+		node.podar = false;
+
+		// Verifica subtour de menor tamanho
+		for(int i = 0; i < node.subtours.size(); i++){
+			if(node.subtours[i].size() < menorSubtour){
+				menorSubtour = node.subtours[i].size();
+				node.escolhido = i;
+			}
+		}
+
+		// Define os arcos proibidos
+		for(int i = 0; i < node.subtours[node.escolhido].size()-1; i++){
+			pair <int, int> arco;
+
+			arco.first = node.subtours[node.escolhido][i];
+			arco.second = node.subtours[node.escolhido][i+1];
+
+			node.arcosProibidos.push_back(arco);
+		}
+	}
+}
 
 void formaSubtours(hungarian_problem_t *p, Node &node){
 	vector <int> listaCandidatos;
@@ -66,19 +109,36 @@ void formaSubtours(hungarian_problem_t *p, Node &node){
 void branchAndBound(){
 
 	vector <Node> arvore;
-	Node raiz;
+	Node raiz, node, newNode;
 
 	hungarian_problem_t p;
 	int mode = HUNGARIAN_MODE_MINIMIZE_COST;
 	hungarian_init(&p, matrizModificada, dimension, dimension, mode); // Carregando o problema
 
 	raiz.lowerBound = hungarian_solve(&p);
-	arvore.push_back(raiz);
-
 	formaSubtours(&p, raiz);
+	procuraArcosProibidos(raiz);
+
+	arvore.push_back(raiz);
+	node = raiz;
+
+	if(!node.podar){
+
+		for(int i = 0; i < node.arcosProibidos.size(); i++){
+
+			newNode.arcosProibidos.push_back(node.arcosProibidos[i]); // Herda arcos proibidos do nó anterior
+			proibeArcos(newNode);
+
+			hungarian_init(&p, matrizModificada, dimension, dimension, mode); // Carregando o problema
+			newNode.lowerBound = hungarian_solve(&p);
+			formaSubtours(&p, newNode);
+			procuraArcosProibidos(newNode);
+
+			arvore.push_back(newNode);
+		}
+	}
 
 	hungarian_free(&p);
-
 }
 
 int main(int argc, char** argv) {
