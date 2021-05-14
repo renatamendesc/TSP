@@ -103,6 +103,16 @@ void formaSubtours(hungarian_problem_t *p, Node &node){
 			}
 		}
 	}
+
+	std::cout << "Subtours fim: " << endl;
+	for(int i = 0; i < node.subtours.size(); i++){
+		for(int j = 0; j < node.subtours[i].size(); j++){
+			std::cout << node.subtours[i][j] << " ";
+		}
+
+		std::cout << endl;
+	}
+
 }
 
 void branchAndBound(){
@@ -115,53 +125,66 @@ void branchAndBound(){
 	hungarian_init(&p, matrizModificada, dimension, dimension, mode); // Carregando o problema
 
 	raiz.lowerBound = hungarian_solve(&p);
-	cout << raiz.lowerBound << endl;
+	std::cout << raiz.lowerBound << endl;
 	formaSubtours(&p, raiz);
 	procuraArcosProibidos(raiz);
 
 	arvore.push_back(raiz); // Adiciona raiz
 
+	hungarian_free(&p);
+
+	int iter = -1;
 	while(true){
-		int tam = arvore.size();
+		float menorNo = __FLT_MAX__;
+		int tam = arvore.size(), iMenorNo;
 		bool flag = true;
+		iter++;
 
 		// Percorre nós existentes
 		for(int i = 0; i < tam; i++){
 
-			Node node = arvore[i], newNode;
+			Node node = arvore[0];
+			cout << "Filhos de " << node.lowerBound << endl;
 
 			// Caso o nó possua mais de um subtour
 			if(!node.podar){
 				flag = false;
 
 				// Gera um novo nó para cada arco proibido
-				for(int i = 0; i < node.arcosProibidos.size(); i++){
+				for(int j = 0; j < node.arcosProibidos.size(); j++){
+					Node newNode;
 
-					newNode.arcosProibidos.push_back(node.arcosProibidos[i]); // Nó gerado herda arco proibido
+					newNode.arcosProibidos.push_back(node.arcosProibidos[j]); // Nó gerado herda arco proibido
 					proibeArcos(newNode); // Adiciona restrição de proibição
 
 					hungarian_init(&p, matrizModificada, dimension, dimension, mode); // Carregando o problema
 
 					newNode.lowerBound = hungarian_solve(&p);
-					cout << newNode.lowerBound << endl;
+					std::cout << "Lower bound: " << newNode.lowerBound << endl;
 
 					formaSubtours(&p, newNode);
 					procuraArcosProibidos(newNode);
 
+					std::cout << "Subtours gerados: " << newNode.subtours.size() << endl;
+					std::cout << "Arcos proibidos: " << newNode.arcosProibidos.size() << endl;
+
 					arvore.push_back(newNode);
+
+					hungarian_free(&p);
 					
 				}
 
+				std::cout << endl;
 				arvore.erase(arvore.begin() + i); // Apaga nó já utilizado
+			} else {
+				cout << "Podar! " << endl;
 			}
 		}
 
-		if(flag){
+		if(iter == 4){
 			break;
 		}
 	}
-
-	hungarian_free(&p);
 
 	for(int i = 0; i < arvore.size(); i++){
 		if(arvore[i].lowerBound < custo){
@@ -169,7 +192,7 @@ void branchAndBound(){
 		}
 	}
 
-	cout << "Custo: " << custo << endl;
+	std::cout << "Custo: " << custo << endl;
 }
 
 int main(int argc, char** argv) {
