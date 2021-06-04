@@ -97,13 +97,17 @@ void calcularSolucao(hungarian_problem_t *p, Node &node){
 	}
 }
 
-void branchAndBound(){
-	vector <double> upperBounds;
+void busca(){
+	clock_t inicio = clock();
+
+	double custo = __DBL_MAX__;
+	vector <Node> upperBounds;
 	vector <Node> arvore;
-	Node raiz;
+	Node raiz, solucao;
 
 	matrizModificada = new double *[dimension];
 
+	// Matriz modificada recebe matriz original
 	for(int i = 0; i < dimension; i++){
 		matrizModificada[i] = new double [dimension];
 
@@ -156,21 +160,9 @@ void branchAndBound(){
 					newNode.lowerBound = hungarian_solve(&p);
 					calcularSolucao(&p, newNode);
 
-					/*
-					cout << "Filhos de " << node.lowerBound << ": " << endl;
-					cout << "Lower bound: " << newNode.lowerBound << endl;
-
-					cout << "Subtours: " << endl;
-					for(int k = 0; k < newNode.subtours.size(); k++){
-						for(int l = 0; l < newNode.subtours[k].size(); l++){
-							cout << newNode.subtours[k][l] << " ";
-						}
-						cout << endl;
-					}
-					*/
-
+					// Verifica se há algum upper bound menor que o lower bound encontrado
 					for(int k = 0; k < upperBounds.size(); k++){
-						if(newNode.lowerBound > upperBounds[k]){
+						if(newNode.lowerBound > upperBounds[k].lowerBound){
 							flag = false;
 						}
 					}
@@ -183,45 +175,36 @@ void branchAndBound(){
 				}
 
 			} else {
-				/*
-				cout << "Lower bound: " << node.lowerBound << endl;
+				upperBounds.push_back(node); // Adiciona na lista de upper bounds
 
-				cout << "Subtours: " << endl;
-				for(int k = 0; k < node.subtours.size(); k++){
-					for(int l = 0; l < node.subtours[k].size(); l++){
-						cout << node.subtours[k][l] << " ";
-					}
-					cout << endl;
+				// Verifica o melhoror o custo
+				if(node.lowerBound < custo){
+					custo = node.lowerBound;
+					solucao = node;
 				}
-				*/
-
-				upperBounds.push_back(node.lowerBound);
-
-				// cout << "podar!" << endl;
-
 			}
 
-			arvore.erase(arvore.begin());
-
+			arvore.erase(arvore.begin()); // Apaga nó já analisado
 		}
 	}
 
-	double custo = __DBL_MAX__;
-	for(int i = 0; i < upperBounds.size(); i++){
-		//cout << "upper bound " << i+1 << ": " << upperBounds[i] << endl;
-		if(upperBounds[i] < custo){
-			custo = upperBounds[i];
-		}
-	}
-
-	for (int i = 0; i < dimension; i++){
+	for(int i = 0; i < dimension; i++){
         delete[] matrizModificada[i];
     }
 
-	cout << "Custo: " << custo << endl;
+	cout << "Solucao: ";
+	for(int i = 0; i < solucao.subtours[0].size(); i++){
+		cout << solucao.subtours[0][i] << " ";
+	}
+
+	cout << endl << "Custo: " << custo << endl;
+
+	clock_t fim = clock();
+	double tempo = ((double) (fim - inicio)) / CLOCKS_PER_SEC;
+	cout << "Tempo: " << tempo << endl;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv){
 
 	Data * data = new Data(argc, argv[1]);
 	data->readData();
@@ -237,10 +220,12 @@ int main(int argc, char** argv) {
 	dimension = data->getDimension();
 	matrizReal = cost;
 
-	branchAndBound();
+	busca();
 
 	for (int i = 0; i < data->getDimension(); i++) delete [] cost[i];
 	delete [] cost;
+	delete [] matrizModificada;
+	delete [] matrizReal;
 	delete data;
 
 	return 0;
