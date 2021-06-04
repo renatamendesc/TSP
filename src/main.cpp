@@ -97,7 +97,7 @@ void calcularSolucao(hungarian_problem_t *p, Node &node){
 	}
 }
 
-void busca(){
+void largura(){
 	clock_t inicio = clock();
 
 	double custo = __DBL_MAX__;
@@ -220,12 +220,10 @@ int main(int argc, char** argv){
 	dimension = data->getDimension();
 	matrizReal = cost;
 
-	busca();
+	largura();
 
 	for (int i = 0; i < data->getDimension(); i++) delete [] cost[i];
 	delete [] cost;
-	delete [] matrizModificada;
-	delete [] matrizReal;
 	delete data;
 
 	return 0;
