@@ -22,10 +22,17 @@ typedef struct {
 } Node;
 
 void proibeArcos(Node &node){
-	matrizModificada = matrizReal;
+
+	// Matriz modificada recebe matriz original
+	for(int i = 0; i < dimension; i++){
+        for(int j = 0; j < dimension; j++){
+			matrizModificada[i][j] = matrizReal[i][j];
+        }
+    }
 
 	// Percorre arcos a serem proibidos
 	for(int i = 0; i < node.arcosProibidos.size(); i++){
+
 		// Adiciona restrição referente aos arcos proibidos
 		matrizModificada[node.arcosProibidos[i].first-1][node.arcosProibidos[i].second-1] = INFINITE;
 	}
@@ -95,6 +102,16 @@ void branchAndBound(){
 	vector <Node> arvore;
 	Node raiz;
 
+	matrizModificada = new double *[dimension];
+
+	for(int i = 0; i < dimension; i++){
+		matrizModificada[i] = new double [dimension];
+
+        for(int j = 0; j < dimension; j++){
+			matrizModificada[i][j] = matrizReal[i][j];
+        }
+    }
+
 	int mode = HUNGARIAN_MODE_MINIMIZE_COST;
 	hungarian_problem_t p;
 	hungarian_init(&p, matrizModificada, dimension, dimension, mode); // Carregando o problema
@@ -106,22 +123,21 @@ void branchAndBound(){
 
 	hungarian_free(&p);
 
-	int iter = 0;
 	while(!arvore.empty()){
 		int tam = arvore.size();
 
 		// Percorre nós da árvore	
 		for(int i = 0; i < tam; i++){
-
-			Node node = arvore[i];
+			Node node = arvore[0];
 
 			// Verifica se o nó em questão tem solução viável
 			if(!node.podar){
-				
+
 				// Percorre arcos a serem proibidos
 				for(int j = 0; j < node.subtours[node.escolhido].size()-1; j++){
 
 					Node newNode;
+					bool flag = true;
 					newNode.arcosProibidos = node.arcosProibidos; // Novo nó herda arcos proibidos 
 
 					// Define o arco proibido em questão
@@ -140,50 +156,69 @@ void branchAndBound(){
 					newNode.lowerBound = hungarian_solve(&p);
 					calcularSolucao(&p, newNode);
 
-					cout << "Filhos " << node.lowerBound << ": " << endl;
+					/*
+					cout << "Filhos de " << node.lowerBound << ": " << endl;
 					cout << "Lower bound: " << newNode.lowerBound << endl;
 
-					std::cout << "Subtours: " << endl;
-					for(int k = 0; k < node.subtours.size(); k++){
-						for(int l = 0; l < node.subtours[k].size(); l++){
-							std::cout << node.subtours[k][l] << " ";
+					cout << "Subtours: " << endl;
+					for(int k = 0; k < newNode.subtours.size(); k++){
+						for(int l = 0; l < newNode.subtours[k].size(); l++){
+							cout << newNode.subtours[k][l] << " ";
 						}
+						cout << endl;
+					}
+					*/
 
-						std::cout << endl;
+					for(int k = 0; k < upperBounds.size(); k++){
+						if(newNode.lowerBound > upperBounds[k]){
+							flag = false;
+						}
 					}
 
-					arvore.push_back(newNode); // Adiciona na árvore
-
+					if(flag){
+						arvore.push_back(newNode); // Adiciona na árvore
+					}
+					
 					hungarian_free(&p);
 				}
 
 			} else {
-				upperBounds.push_back(arvore[i].lowerBound);
-				cout << "podar!" << endl;
+				/*
+				cout << "Lower bound: " << node.lowerBound << endl;
+
+				cout << "Subtours: " << endl;
+				for(int k = 0; k < node.subtours.size(); k++){
+					for(int l = 0; l < node.subtours[k].size(); l++){
+						cout << node.subtours[k][l] << " ";
+					}
+					cout << endl;
+				}
+				*/
+
+				upperBounds.push_back(node.lowerBound);
+
+				// cout << "podar!" << endl;
 
 			}
 
 			arvore.erase(arvore.begin());
 
-			cout << endl;
-
 		}
-
-		if(iter == 10){
-			break;
-		}
-
-		iter++;
 	}
 
-	double custo = __FLT_MAX__;
+	double custo = __DBL_MAX__;
 	for(int i = 0; i < upperBounds.size(); i++){
+		//cout << "upper bound " << i+1 << ": " << upperBounds[i] << endl;
 		if(upperBounds[i] < custo){
 			custo = upperBounds[i];
 		}
 	}
 
-	cout << custo << endl;
+	for (int i = 0; i < dimension; i++){
+        delete[] matrizModificada[i];
+    }
+
+	cout << "Custo: " << custo << endl;
 }
 
 int main(int argc, char** argv) {
@@ -199,9 +234,8 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	matrizReal = cost;
-	matrizModificada = matrizReal;
 	dimension = data->getDimension();
+	matrizReal = cost;
 
 	branchAndBound();
 
