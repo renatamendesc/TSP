@@ -7,7 +7,6 @@
 using namespace std;
 
 double ** matrizReal;
-double ** matrizModificada;
 int dimension;
 
 typedef struct {
@@ -21,7 +20,7 @@ typedef struct {
 
 } Node;
 
-void proibeArcos(Node &node){
+void proibeArcos(Node &node, double ** matrizModificada){
 
 	// Matriz modificada recebe matriz original
 	for(int i = 0; i < dimension; i++){
@@ -105,16 +104,16 @@ void largura(){
 	vector <Node> arvore;
 	Node raiz, solucao;
 
-	matrizModificada = new double *[dimension];
+	double ** matrizModificada = new double *[dimension];
 
 	// Matriz modificada recebe matriz original
 	for(int i = 0; i < dimension; i++){
 		matrizModificada[i] = new double [dimension];
 
-        for(int j = 0; j < dimension; j++){
+		for(int j = 0; j < dimension; j++){
 			matrizModificada[i][j] = matrizReal[i][j];
-        }
-    }
+		}
+	}
 
 	int mode = HUNGARIAN_MODE_MINIMIZE_COST;
 	hungarian_problem_t p;
@@ -153,7 +152,7 @@ void largura(){
 					// Adiciona novo arco proibido
 					newNode.arcosProibidos.push_back(arco);
 
-					proibeArcos(newNode);
+					proibeArcos(newNode, matrizModificada);
 
 					hungarian_problem_t p;
 					hungarian_init(&p, matrizModificada, dimension, dimension, mode); // Carregando o problema
@@ -189,8 +188,10 @@ void largura(){
 	}
 
 	for(int i = 0; i < dimension; i++){
-        delete[] matrizModificada[i];
-    }
+		delete[] matrizModificada[i];
+	}
+
+	delete[] matrizModificada;
 
 	cout << "Solucao: ";
 	for(int i = 0; i < solucao.subtours[0].size(); i++){
