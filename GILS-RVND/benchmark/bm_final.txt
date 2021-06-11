@@ -1,0 +1,272 @@
+instances/a280.tsp
+Custo: 2579.000000
+Tempo: 71.031960
+
+instances/ali535.tsp
+Custo: 202399.600000
+Tempo: 1518.788000
+
+instances/att48.tsp
+Custo: 10628.000000
+Tempo: 0.204816
+
+instances/att532.tsp
+Custo: 27725.400000
+Tempo: 1295.989000
+
+instances/bayg29.tsp
+Custo: 1610.000000
+Tempo: 0.039426
+
+instances/bays29.tsp
+Custo: 2020.000000
+Tempo: 0.040895
+
+instances/berlin52.tsp
+Custo: 7542.000000
+Tempo: 0.251604
+
+instances/bier127.tsp
+Custo: 118282.000000
+Tempo: 7.605830
+
+instances/brazil58.tsp
+Custo: 25395.000000
+Tempo: 0.317158
+
+instances/brg180.tsp
+Custo: 1950.000000
+Tempo: 8.886614
+
+instances/burma14.tsp
+Custo: 3323.000000
+Tempo: 0.003401
+
+instances/ch130.tsp
+Custo: 6110.000000
+Tempo: 7.800187
+
+instances/ch150.tsp
+Custo: 6528.000000
+Tempo: 7.326027
+
+instances/d198.tsp
+Custo: 15780.000000
+Tempo: 23.536350
+
+instances/dantzig42.tsp
+Custo: 699.000000
+Tempo: 0.118021
+
+instances/eil101.tsp
+Custo: 629.000000
+Tempo: 2.878410
+
+instances/eil51.tsp
+Custo: 426.000000
+Tempo: 0.254221
+
+instances/eil76.tsp
+Custo: 538.000000
+Tempo: 1.048965
+
+instances/fl417.tsp
+Custo: 11861.000000
+Tempo: 301.734800
+
+instances/fri26.tsp
+Custo: 937.000000
+Tempo: 0.027005
+
+instances/gil262.tsp
+Custo: 2378.400000
+Tempo: 78.419290
+
+instances/gr120.tsp
+Custo: 6942.000000
+Tempo: 6.553451
+
+instances/gr137.tsp
+Custo: 69853.000000
+Tempo: 7.515965
+
+instances/gr17.tsp
+Custo: 2085.000000
+Tempo: 0.007908
+
+instances/gr202.tsp
+Custo: 40160.000000
+Tempo: 27.593000
+
+instances/gr21.tsp
+Custo: 2707.000000
+Tempo: 0.010873
+
+instances/gr229.tsp
+Custo: 134610.400000
+Tempo: 44.784240
+
+instances/gr24.tsp
+Custo: 1272.000000
+Tempo: 0.030474
+
+instances/gr431.tsp
+Custo: 171589.400000
+Tempo: 578.291300
+
+instances/gr48.tsp
+Custo: 5046.000000
+Tempo: 0.196598
+
+instances/gr96.tsp
+Custo: 55209.000000
+Tempo: 2.147252
+
+instances/hk48.tsp
+Custo: 11461.000000
+Tempo: 0.206426
+
+instances/kroA100.tsp
+Custo: 21282.000000
+Tempo: 2.300433
+
+instances/kroA150.tsp
+Custo: 26524.000000
+Tempo: 8.468804
+
+instances/kroA200.tsp
+Custo: 29368.000000
+Tempo: 26.477010
+
+instances/kroB100.tsp
+Custo: 22141.000000
+Tempo: 2.529381
+
+instances/kroB150.tsp
+Custo: 26130.000000
+Tempo: 8.101180
+
+instances/kroB200.tsp
+Custo: 29437.100000
+Tempo: 29.248510
+
+instances/kroC100.tsp
+Custo: 20749.000000
+Tempo: 2.343282
+
+instances/kroD100.tsp
+Custo: 21294.000000
+Tempo: 2.618377
+
+instances/kroE100.tsp
+Custo: 22068.000000
+Tempo: 2.537816
+
+instances/lin105.tsp
+Custo: 14379.000000
+Tempo: 2.637980
+
+instances/lin318.tsp
+Custo: 42054.000000
+Tempo: 149.775800
+
+instances/linhp318.tsp
+Custo: 42057.300000
+Tempo: 154.577300
+
+instances/pcb442.tsp
+Custo: 50905.900000
+Tempo: 504.456600
+
+instances/pr107.tsp
+Custo: 44303.000000
+Tempo: 2.974352
+
+instances/pr124.tsp
+Custo: 59030.000000
+Tempo: 4.122498
+
+instances/pr136.tsp
+Custo: 96772.000000
+Tempo: 8.719939
+
+instances/pr144.tsp
+Custo: 58537.000000
+Tempo: 7.385610
+
+instances/pr152.tsp
+Custo: 73682.000000
+Tempo: 5.933730
+
+instances/pr226.tsp
+Custo: 80369.000000
+Tempo: 31.322850
+
+instances/pr264.tsp
+Custo: 49135.000000
+Tempo: 50.370460
+
+instances/pr299.tsp
+Custo: 48197.500000
+Tempo: 98.168570
+
+instances/pr76.tsp
+Custo: 108159.000000
+Tempo: 0.868386
+
+instances/rat195.tsp
+Custo: 2323.200000
+Tempo: 20.230620
+
+instances/rat99.tsp
+Custo: 1211.000000
+Tempo: 2.731176
+
+instances/rd100.tsp
+Custo: 7910.000000
+Tempo: 2.590525
+
+instances/rd400.tsp
+Custo: 15292.800000
+Tempo: 441.406900
+
+instances/si175.tsp
+Custo: 21407.000000
+Tempo: 11.242430
+
+instances/si535.tsp
+Custo: 48458.600000
+Tempo: 674.032200
+
+instances/st70.tsp
+Custo: 675.000000
+Tempo: 0.681164
+
+instances/swiss42.tsp
+Custo: 1273.000000
+Tempo: 0.106829
+
+instances/ts225.tsp
+Custo: 126643.000000
+Tempo: 21.318180
+
+instances/tsp225.tsp
+Custo: 3916.000000
+Tempo: 35.003240
+
+instances/u159.tsp
+Custo: 42080.000000
+Tempo: 6.899095
+
+instances/ulysses16.tsp
+Custo: 6859.000000
+Tempo: 0.005255
+
+instances/ulysses22.tsp
+Custo: 7013.000000
+Tempo: 0.014391
+
+-
+Custo: 7013.000000
+Tempo: 0.014877
+
