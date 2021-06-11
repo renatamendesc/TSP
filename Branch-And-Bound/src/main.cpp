@@ -20,6 +20,23 @@ typedef struct {
 
 } Node;
 
+void printSolucao(Node &solucao){
+
+	if(solucao.podar){
+
+		cout << "Solucao: ";
+		for(int i = 0; i < solucao.subtours[0].size(); i++)
+			cout << solucao.subtours[0][i] << " ";
+
+		cout << endl << "Custo: " << solucao.lowerBound << endl;
+
+	}else{
+
+		cout << "Nenhuma solução viável foi encontrada!" << endl;
+
+	}
+}
+
 void proibeArcos(Node &node, double ** matrizModificada){
 
 	// Matriz modificada recebe matriz original
@@ -179,12 +196,7 @@ void largura(Node raiz){
 	for(int i = 0; i < dimension; i++) delete[] matrizModificada[i];
 	delete[] matrizModificada;
 
-	cout << "Solucao: ";
-	for(int i = 0; i < solucao.subtours[0].size(); i++){
-		cout << solucao.subtours[0][i] << " ";
-	}
-
-	cout << endl << "Custo: " << custo << endl;
+	printSolucao(solucao);
 
 	double tempo = ((double) (fim - inicio)) / CLOCKS_PER_SEC;
 	cout << "Tempo: " << tempo << endl;
@@ -263,6 +275,10 @@ void profundidade(Node raiz){
 		}
 
 		arvore.erase(arvore.begin() + tam - 1); // Apaga nó já analisado
+
+		clock_t progresso = clock();
+		double tempo = ((double) (progresso - inicio)) / CLOCKS_PER_SEC;
+		if(tempo > 600) break;
 		
 	}
 
@@ -271,12 +287,7 @@ void profundidade(Node raiz){
 	for(int i = 0; i < dimension; i++) delete[] matrizModificada[i];
 	delete[] matrizModificada;
 
-	cout << "Solucao: ";
-	for(int i = 0; i < solucao.subtours[0].size(); i++){
-		cout << solucao.subtours[0][i] << " ";
-	}
-
-	cout << endl << "Custo: " << custo << endl;
+	printSolucao(solucao);
 
 	double tempo = ((double) (fim - inicio)) / CLOCKS_PER_SEC;
 	cout << "Tempo: " << tempo << endl;
