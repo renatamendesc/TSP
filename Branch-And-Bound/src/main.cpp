@@ -4,7 +4,7 @@
 #include <vector>
 #include <climits>
 
-//using namespace std;
+using namespace std;
 
 double ** matrizReal;
 int dimension;
