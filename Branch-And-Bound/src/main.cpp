@@ -1,122 +1,27 @@
 #include "data.h"
 #include "hungarian.h"
+#include "node.h"
 #include <iostream>
 #include <vector>
 #include <climits>
 
 using namespace std;
 
-double ** matrizReal;
-int dimension;
+void search(string tipo, double ** matrizReal, int dimension){
 
-typedef struct {
+	clock_t inicio = clock(); // Inicia contagem do tempo
 
-	vector <pair <int, int>> arcosProibidos; // Lista de arcos que foram proibidos
-	vector <vector <int>> subtours; // Lista de subtours gerados pela solução do algoritmo húngaro
-
-	double lowerBound; // Resultado da solução gerada pelo algoritmo húngaro
-	int escolhido; // Subtour escolhido que terá arcos proibidos
-	bool podar; // Indica se o nó deve gerar filhos
-
-} Node;
-
-void printSolucao(Node &solucao){
-
-	if(solucao.podar){
-		cout << "Solucao: ";
-		for(int i = 0; i < solucao.subtours[0].size(); i++)
-			cout << solucao.subtours[0][i] << " ";
-
-		cout << endl << "Custo: " << solucao.lowerBound << endl;
-
-	}else{
-		cout << "Nenhuma solução viável foi encontrada!" << endl;
-	}
-}
-
-void proibeArcos(Node &node, double ** matrizModificada){
-
-	// Matriz modificada recebe matriz original
-	for(int i = 0; i < dimension; i++){
-        for(int j = 0; j < dimension; j++){
-			matrizModificada[i][j] = matrizReal[i][j];
-        }
-    }
-
-	// Percorre arcos a serem proibidos
-	for(int i = 0; i < node.arcosProibidos.size(); i++){
-		// Adiciona restrição referente aos arcos proibidos
-		matrizModificada[node.arcosProibidos[i].first-1][node.arcosProibidos[i].second-1] = INFINITE;
-	}
-}
-
-void calcularSolucao(hungarian_problem_t *p, Node &node){
-	vector <int> listaCandidatos;
-	vector <int> subtour;
-
-	// Forma lista de candidatos
-	for(int i = 0; i < dimension; i++){
-		listaCandidatos.push_back(i+1);
-	}
-
-	// Forma solução de subtours
-	while(!listaCandidatos.empty()){
-		int i = listaCandidatos[0]-1; 
-		int inicio = i;
-		subtour.push_back(inicio + 1);
-
-		while(true){
-			// Apaga nó em questão da lista de candidatos
-			for(int j = 0; j < listaCandidatos.size(); j++){
-				if(listaCandidatos[j] == i+1){
-					listaCandidatos.erase(listaCandidatos.begin() + j);
-				}
-			}
-
-			// Verifica existência do arco
-			for(int j = 0; j < dimension; j++){
-				if(p->assignment[i][j]){
-					subtour.push_back(j+1);
-					i = j;
-					break;
-				}
-			}
-
-			// Encerra percurso do subtour
-			if(inicio == i){
-				node.subtours.push_back(subtour);
-				subtour.clear();
-
-				break;
-			}
-		}
-	}
-
-	if(node.subtours.size() == 1){
-		node.podar = true;
-	}else{
-		node.podar = false;
-	}
-
-	int menorSubtour = INT_MAX;
-
-	// Verifica subtour a ser escolhido
-	for(int i = 0; i < node.subtours.size(); i++){
-		if(node.subtours[i].size() < menorSubtour){
-			menorSubtour = node.subtours[i].size();
-			node.escolhido = i;
-		}
-	}
-}
-
-void melhorBound(Node raiz){
-
-	clock_t inicio = clock();
-
-	double tempo, custo = __DBL_MAX__;
+	Node raiz, solucao;
 	vector <Node> arvore;
-	Node solucao, melhorNode;
+	hungarian_problem_t p;
 
+	hungarian_init(&p, matrizReal, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST);
+	raiz.setLowerBound(hungarian_solve(&p));
+	raiz.calcularSolucao(&p, dimension);
+	hungarian_free(&p);
+
+	int index;
+	double tempo, custo = __DBL_MAX__;
 	double ** matrizModificada = new double *[dimension];
 
 	// Matriz modificada recebe matriz original
@@ -128,151 +33,73 @@ void melhorBound(Node raiz){
 		}
 	}
 
+	solucao = raiz;
 	arvore.push_back(raiz);
-	melhorNode = arvore[0];
 
-	int index = 0;
 	while(!arvore.empty()){
 
-		Node node = melhorNode;
+		if(tipo == "menorBound"){
 
-		// Verifica se o nó em questão tem solução viável
-		if(!node.podar){
+			double menorBound = __DBL_MAX__;
+			for(int i = 0; i < arvore.size(); i++){
+				if(arvore[i].getLowerBound() < menorBound){
+					menorBound = arvore[i].getLowerBound();
+					index = i;
+				}
+			}
+			
+		}else if(tipo == "largura"){
+			index = 0;
+
+		}else if(tipo == "profundidade"){
+			index = arvore.size()-1;
+
+		}
+
+		Node node = arvore[index];
+
+		if(!node.getPodar()){
 
 			// Percorre arcos a serem proibidos
-			for(int j = 0; j < node.subtours[node.escolhido].size()-1; j++){
+			for(int j = 0; j < node.getSubtourEscolhido().size()-1; j++){
 
 				Node newNode;
-				newNode.arcosProibidos = node.arcosProibidos; // Novo nó herda arcos proibidos 
+				newNode.setArcosProibidos(node.getArcosProibidos()); // Novo nó herda arcos proibidos
 
 				// Define o arco proibido em questão
 				pair <int, int> arco;
 
-				arco.first = node.subtours[node.escolhido][j];
-				arco.second = node.subtours[node.escolhido][j+1];
+				arco.first = node.getSubtourEscolhido()[j];
+				arco.second = node.getSubtourEscolhido()[j+1];
 
 				// Adiciona novo arco proibido
-				newNode.arcosProibidos.push_back(arco);
-				proibeArcos(newNode, matrizModificada);
+				newNode.setArcoProibido(arco);
+				newNode.proibeArcos(dimension, matrizModificada, matrizReal);
 
 				hungarian_problem_t p;
-				hungarian_init(&p, matrizModificada, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST); // Carregando o problema
-
-				newNode.lowerBound = hungarian_solve(&p);
+				hungarian_init(&p, matrizModificada, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST);
+				newNode.setLowerBound(hungarian_solve(&p));
 
 				// Verifica se há algum upper bound menor que o lower bound encontrado
-				if(newNode.lowerBound < custo){
-					calcularSolucao(&p, newNode);
+				if(newNode.getLowerBound() < custo){
+					newNode.calcularSolucao(&p, dimension);
 					arvore.push_back(newNode); // Adiciona na árvore
 				}
-				
+
 				hungarian_free(&p);
 			}
 
 		} else {
 
 			// Verifica o melhor o custo
-			if(node.lowerBound < custo){
-				custo = node.lowerBound;
+			if(node.getLowerBound() < custo){
+				custo = node.getLowerBound();
 				solucao = node;
 			}
 
 		}
 
-		arvore.erase(arvore.begin() + index); // Apaga nó já analisado
-
-		clock_t fim = clock();
-		tempo = ((double) (fim - inicio)) / CLOCKS_PER_SEC;
-		if(tempo > 600) break;
-
-		melhorNode.lowerBound = __DBL_MAX__;
-		for(int i = 0; i < arvore.size(); i++){
-			if(arvore[i].lowerBound < melhorNode.lowerBound){
-				melhorNode = arvore[i];
-				index = i;
-			}
-		}
-	}
-
-	for(int i = 0; i < dimension; i++) delete[] matrizModificada[i];
-	delete[] matrizModificada;
-
-	printSolucao(solucao);
-
-	cout << "Tempo: " << tempo << endl;
-}
-
-void largura(Node raiz){
-
-	clock_t inicio = clock();
-
-	double tempo, custo = __DBL_MAX__;
-	vector <Node> arvore;
-	Node solucao;
-
-	double ** matrizModificada = new double *[dimension];
-
-	// Matriz modificada recebe matriz original
-	for(int i = 0; i < dimension; i++){
-		matrizModificada[i] = new double [dimension];
-
-		for(int j = 0; j < dimension; j++){
-			matrizModificada[i][j] = matrizReal[i][j];
-		}
-	}
-
-	arvore.push_back(raiz);
-
-	while(!arvore.empty()){
-
-		// Percorre nós da árvore	
-		Node node = arvore[0];
-
-		// Verifica se o nó em questão tem solução viável
-		if(!node.podar){
-
-			// Percorre arcos a serem proibidos
-			for(int j = 0; j < node.subtours[node.escolhido].size()-1; j++){
-
-				Node newNode;
-				newNode.arcosProibidos = node.arcosProibidos; // Novo nó herda arcos proibidos 
-
-				// Define o arco proibido em questão
-				pair <int, int> arco;
-
-				arco.first = node.subtours[node.escolhido][j];
-				arco.second = node.subtours[node.escolhido][j+1];
-
-				// Adiciona novo arco proibido
-				newNode.arcosProibidos.push_back(arco);
-				proibeArcos(newNode, matrizModificada);
-
-				hungarian_problem_t p;
-				hungarian_init(&p, matrizModificada, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST); // Carregando o problema
-
-				newNode.lowerBound = hungarian_solve(&p);
-
-				// Verifica se há algum upper bound menor que o lower bound encontrado
-				if(newNode.lowerBound < custo){
-					calcularSolucao(&p, newNode);
-					arvore.push_back(newNode); // Adiciona na árvore
-
-				}
-				
-				hungarian_free(&p);
-			}
-
-		} else {
-
-			// Verifica o melhor o custo
-			if(node.lowerBound < custo){
-				custo = node.lowerBound;
-				solucao = node;
-			}
-
-		}
-
-		arvore.erase(arvore.begin()); // Apaga nó já analisado
+		arvore.erase(arvore.begin() + index);
 
 		clock_t fim = clock();
 		tempo = ((double) (fim - inicio)) / CLOCKS_PER_SEC;
@@ -283,97 +110,9 @@ void largura(Node raiz){
 	for(int i = 0; i < dimension; i++) delete[] matrizModificada[i];
 	delete[] matrizModificada;
 
-	printSolucao(solucao);
+	solucao.printSolucao();
 
-	cout << "Tempo: " << tempo << endl;
-
-}
-
-void profundidade(Node raiz){
-
-	clock_t inicio = clock();
-
-	double tempo, custo = __DBL_MAX__;
-	vector <Node> arvore;
-	Node solucao;
-
-	double ** matrizModificada = new double *[dimension];
-
-	// Matriz modificada recebe matriz original
-	for(int i = 0; i < dimension; i++){
-		matrizModificada[i] = new double [dimension];
-
-		for(int j = 0; j < dimension; j++){
-			matrizModificada[i][j] = matrizReal[i][j];
-		}
-	}
-
-	arvore.push_back(raiz);
-
-	while(!arvore.empty()){
-		int tam = arvore.size();
-
-		// Percorre nós da árvore	
-		Node node = arvore[tam-1];
-
-		// Verifica se o nó em questão tem solução viável
-		if(!node.podar){
-
-			// Percorre arcos a serem proibidos
-			for(int j = 0; j < node.subtours[node.escolhido].size()-1; j++){
-
-				Node newNode;
-				newNode.arcosProibidos = node.arcosProibidos; // Novo nó herda arcos proibidos
-
-				// Define o arco proibido em questão
-				pair <int, int> arco;
-
-				arco.first = node.subtours[node.escolhido][j];
-				arco.second = node.subtours[node.escolhido][j+1];
-
-				// Adiciona novo arco proibido
-				newNode.arcosProibidos.push_back(arco);
-
-				proibeArcos(newNode, matrizModificada);
-
-				hungarian_problem_t p;
-				hungarian_init(&p, matrizModificada, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST); // Carregando o problema
-				newNode.lowerBound = hungarian_solve(&p);
-
-				// Verifica se há algum upper bound menor que o lower bound encontrado
-				if(newNode.lowerBound < custo){
-					calcularSolucao(&p, newNode);
-					arvore.push_back(newNode); // Adiciona na árvore
-				}
-
-				hungarian_free(&p);
-			}
-
-		} else {
-
-			// Verifica o melhoro o custo
-			if(node.lowerBound < custo){
-				custo = node.lowerBound;
-				solucao = node;
-			}
-
-		}
-
-		arvore.erase(arvore.begin() + tam - 1); // Apaga nó já analisado
-
-		clock_t fim = clock();
-		tempo = ((double) (fim - inicio)) / CLOCKS_PER_SEC;
-		if(tempo > 600) break;
-		
-	}
-
-	for(int i = 0; i < dimension; i++) delete[] matrizModificada[i];
-	delete[] matrizModificada;
-
-	printSolucao(solucao);
-
-	cout << "Tempo: " << tempo << endl;
-
+	cout << "Tempo: " << tempo << endl << endl;
 }
 
 int main(int argc, char** argv){
@@ -389,41 +128,37 @@ int main(int argc, char** argv){
 		}
 	}
 
-	dimension = data->getDimension();
-	matrizReal = cost;
+	double ** matrizReal = cost;
+	int selection, dimension = data->getDimension();
 
-	Node raiz;
-	hungarian_problem_t p;
+	string tipo;
 
-	hungarian_init(&p, matrizReal, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST); // Carregando o problema
-	raiz.lowerBound = hungarian_solve(&p);
-	calcularSolucao(&p, raiz); // Calcula subtours da solução
+	cout << "\n------------------------------------------------\n\n";
+	cout << "Selecione o tipo de busca:\n\n";
+	cout << "[1] Melhor bound\n";
+	cout << "[2] Largura\n";
+	cout << "[3] Profundidade\n";
+	cout << "\n------------------------------------------------\n";
 
-	cout << "Selecione o tipo de busca:" << endl;
-	cout << "[1] Melhor bound" << endl;
-	cout << "[2] Largura" << endl;
-	cout << "[3] Profundidade" << endl;
-
-	int selection;
 	cin >> selection;
 
 	switch(selection){
 
 		case 1:
-			melhorBound(raiz);
+			tipo = "menorBound";
 			break;
 
 		case 2:
-			largura(raiz);
+			tipo = "largura";
 			break;
 
 		case 3:
-			profundidade(raiz);
+			tipo = "profundidade";
 			break;
 
 	}
 
-	hungarian_free(&p);
+	search(tipo, matrizReal, dimension);
 
 	for (int i = 0; i < data->getDimension(); i++) delete [] cost[i];
 	delete [] cost;
