@@ -76,7 +76,7 @@ void Node::calcularSolucao(hungarian_problem_t *p, int dimension){
 	}
 }
 
-void Node::printSolucao(){
+void Node::printSolucao(double tempo){
 
     if(this->podar){
 
@@ -89,6 +89,8 @@ void Node::printSolucao(){
 	}else{
 		cout << "Nenhuma solução viável foi encontrada!" << endl;
 	}
+
+	cout << "Tempo: " << tempo << endl << endl;
 
 }
 

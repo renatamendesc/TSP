@@ -21,7 +21,7 @@ class Node {
     public:
         void proibeArcos(int dimension, double ** matrizModificada, double ** matrizReal);
         void calcularSolucao(hungarian_problem_t *p, int dimension);
-        void printSolucao();
+        void printSolucao(double tempo);
 
         bool getPodar();
         double getLowerBound();

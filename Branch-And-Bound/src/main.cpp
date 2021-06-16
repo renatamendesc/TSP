@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <climits>
+#include <algorithm>
 
 using namespace std;
 
@@ -39,7 +40,7 @@ void search(string tipo, double ** matrizReal, int dimension){
 	while(!arvore.empty()){
 
 		if(tipo == "menorBound"){
-
+			
 			double menorBound = __DBL_MAX__;
 			for(int i = 0; i < arvore.size(); i++){
 				if(arvore[i].getLowerBound() < menorBound){
@@ -110,9 +111,8 @@ void search(string tipo, double ** matrizReal, int dimension){
 	for(int i = 0; i < dimension; i++) delete[] matrizModificada[i];
 	delete[] matrizModificada;
 
-	solucao.printSolucao();
+	solucao.printSolucao(tempo);
 
-	cout << "Tempo: " << tempo << endl << endl;
 }
 
 int main(int argc, char** argv){
@@ -134,7 +134,7 @@ int main(int argc, char** argv){
 	string tipo;
 
 	cout << "\n------------------------------------------------\n\n";
-	cout << "Selecione o tipo de busca:\n\n";
+	cout << "Selecione um tipo de busca:\n\n";
 	cout << "[1] Melhor bound\n";
 	cout << "[2] Largura\n";
 	cout << "[3] Profundidade\n";
