@@ -6,7 +6,7 @@ Sendo assim, este repósitório contém diferentes formas de resolução para o 
 ## Abordagens de resolução
 
 ### 1. Meta-Heurística:
-Para casos onde o número de destinos que se deseja percorrer é muito grande, faz-se necessário o uso de uma meta-heurística para resolver a situação, que não garante a solução ótima, porém, no geral, retorna soluções satisfatórias. Caso contrário, o computador não é capaz de determinar a melhor solução em um tempo viável. Dessa maneira, na resolução do de forma meta-heurística, foi utilizado a **GILS-RVND**, que une componentes das heurísticas GRASP (Greedy Randomized Adaptive Search Procedure), ILS (Iterated Local Search) e RVND (Randomized Variable Neighborhood Descent).
+Para casos onde o número de destinos que se deseja percorrer é muito grande, faz-se necessário o uso de uma meta-heurística para resolver a situação, que não garante a solução ótima, porém, no geral, retorna soluções satisfatórias. Caso contrário, o computador não é capaz de determinar a melhor solução em um tempo viável. Dessa maneira, na resolução de forma meta-heurística, foi utilizado a **GILS-RVND**, que une componentes das heurísticas GRASP (Greedy Randomized Adaptive Search Procedure), ILS (Iterated Local Search) e RVND (Randomized Variable Neighborhood Descent).
 
 * **Resultados:** Uma vez implementado corretamente, o algoritmo é capaz de obter o valor ótimo para instâncias de até 300 cidades na maioria das vezes em que é executado. Todos os resultados da execução do programa foram registrados na pasta [benchmark](https://github.com/renatamendesc/TSP/blob/main/GILS-RVND/benchmark/bm_final.txt).
 
