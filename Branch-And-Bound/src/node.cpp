@@ -80,7 +80,7 @@ void Node::printSolucao(double tempo){
 
     if(this->podar){
 
-		cout << "\nSolucao: ";
+		cout << "\nSolução: ";
 		for(int i = 0; i < this->subtours[0].size(); i++)
 			cout << this->subtours[0][i] << " ";
 

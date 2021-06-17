@@ -3,18 +3,26 @@
 #include "node.h"
 #include <iostream>
 #include <vector>
+#include <queue>
 #include <climits>
 #include <algorithm>
 
 using namespace std;
+
+// Função para especificar ordem da priority_queue, sobrecarregando o operador
+bool operator < (Node a, Node b){
+	return a.getLowerBound() > b.getLowerBound();
+}
 
 void search(string tipo, double ** matrizReal, int dimension){
 
 	clock_t inicio = clock(); // Inicia contagem do tempo
 
 	Node raiz, solucao;
-	vector <Node> arvore;
 	hungarian_problem_t p;
+
+	vector <Node> arvore;
+	priority_queue <Node> arvoreMenorBound;
 
 	hungarian_init(&p, matrizReal, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST);
 	raiz.setLowerBound(hungarian_solve(&p));
@@ -35,29 +43,30 @@ void search(string tipo, double ** matrizReal, int dimension){
 	}
 
 	solucao = raiz;
-	arvore.push_back(raiz);
 
-	while(!arvore.empty()){
+	if(tipo == "menorBound"){
+		arvoreMenorBound.push(raiz);
+	} else {
+		arvore.push_back(raiz);
+	}
+
+	while(!arvore.empty() || !arvoreMenorBound.empty()){
+
+		Node node;
 
 		if(tipo == "menorBound"){
-			
-			double menorBound = __DBL_MAX__;
-			for(int i = 0; i < arvore.size(); i++){
-				if(arvore[i].getLowerBound() < menorBound){
-					menorBound = arvore[i].getLowerBound();
-					index = i;
-				}
-			}
+			node = arvoreMenorBound.top();
+			arvoreMenorBound.pop();
 			
 		}else if(tipo == "largura"){
-			index = 0;
+			node = arvore.front();
+			arvore.erase(arvore.begin());
 
 		}else if(tipo == "profundidade"){
-			index = arvore.size()-1;
+			node = arvore.back();
+			arvore.erase(arvore.end());
 
 		}
-
-		Node node = arvore[index];
 
 		if(!node.getPodar()){
 
@@ -84,7 +93,13 @@ void search(string tipo, double ** matrizReal, int dimension){
 				// Verifica se há algum upper bound menor que o lower bound encontrado
 				if(newNode.getLowerBound() < custo){
 					newNode.calcularSolucao(&p, dimension);
-					arvore.push_back(newNode); // Adiciona na árvore
+
+					// Adiciona na árvore
+					if(tipo == "menorBound"){
+						arvoreMenorBound.push(newNode);
+					}else{
+						arvore.push_back(newNode); 
+					}	
 				}
 
 				hungarian_free(&p);
@@ -99,8 +114,6 @@ void search(string tipo, double ** matrizReal, int dimension){
 			}
 
 		}
-
-		arvore.erase(arvore.begin() + index);
 
 		clock_t fim = clock();
 		tempo = ((double) (fim - inicio)) / CLOCKS_PER_SEC;
