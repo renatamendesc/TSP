@@ -1,5 +1,5 @@
 # Traveling Salesman Problem (TSP)
-The Traveling Salesman Problem (TSP) it's a traditional optimization problem in the literature. The problem consists of telling the shortest possible route to visit a series of cities exactly once and then returns to the original city. 
+The Traveling Salesman Problem (TSP) is a traditional optimization problem in the literature. The problem consists on telling the shortest possible route to visit a series of cities exactly once and then returns to the original city. 
 
 That being so, this repository contains different approaches to solve TSP.
 
