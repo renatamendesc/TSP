@@ -59,7 +59,6 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
     double *x = new double [N+1];
     double *y = new double [N+1];
 
-    // Alocar matriz 2D
     double **dist = new double*[N+1];
 
     for ( int i = 0; i < N+1; i++ ) {
@@ -85,7 +84,6 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
                 in >> arquivo;
             }
 
-            // Preencher Matriz Distancia
             for ( int i = 1; i < N+1; i++ ) {
                 for ( int j = 1; j < N+1; j++ ) {
                     in >> dist[i][j];
@@ -99,7 +97,6 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
                 in >> arquivo;
             }
 
-            // Preencher Matriz Distancia
             for ( int i = 1; i < N; i++ ) {
                 for ( int j = i+1; j < N+1; j++ ) {
                     in >> dist[i][j];
@@ -119,7 +116,6 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
                 in >> arquivo;
             }
 
-            // Preencher Matriz Distancia
             for ( int i = 2; i < N+1; i++ ) {
                 for ( int j = 1; j < i; j++ ) {
                     in >> dist[i][j];
@@ -138,7 +134,6 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
                 in >> arquivo;
             }
 
-            // Preencher Matriz Distancia
             for ( int i = 1; i < N+1; i++ ) {
                 for ( int j = i; j < N+1; j++ ) {
                     in >> dist[i][j];
@@ -153,7 +148,6 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
                 in >> arquivo;
             }
 
-            // Preencher Matriz Distancia
             for ( int i = 1; i < N+1; i++ ) {
                 for ( int j = 1; j <= i; j++ ) {
                     in >> dist[i][j];
@@ -208,7 +202,6 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
                 in >> arquivo;
             }
 
-            // Preencher Matriz Distancia
             for ( int j = 1; j < N+1; j++ ) {
                 for ( int i = 1; i <= j; i++ ) {
                     in >> dist[i][j];
@@ -223,7 +216,6 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
                 in >> arquivo;
             }
 
-            // Preencher Matriz Distancia
             for ( int j = 1; j < N+1; j++ ) {
                 for ( int i = j; i < N+1; j++ ) {
                     in >> dist[i][j];
@@ -239,13 +231,12 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
         while ( arquivo.compare("NODE_COORD_SECTION") != 0 ) {
             in >> arquivo;
         }
-        // ler coordenadas
+
         int tempCity;
         for ( int i = 1; i < N+1; i++ ) {
             in >> tempCity >> x[i] >> y[i];
         }
 
-        // Calcular Matriz Distancia (Euclidiana)
         for ( int i = 1; i < N+1; i++ ) {
             for ( int j = 1; j < N+1; j++ ) {
                 dist[i][j] = floor ( CalcDistEuc ( x, y, i, j ) + 0.5 );
@@ -273,13 +264,12 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
         while ( arquivo.compare("NODE_COORD_SECTION") != 0 ) {
             in >> arquivo;
         }
-        // ler coordenadas
+
         int tempCity;
         for ( int i = 1; i < N+1; i++ ) {
             in >> tempCity >> x[i] >> y[i];
         }
 
-        // Calcular Matriz Distancia (Euclidiana)
         for ( int i = 1; i < N+1; i++ ) {
             for ( int j = 1; j < N+1; j++ ) {
                 dist[i][j] = ceil ( CalcDistEuc ( x, y, i, j ) );
@@ -292,7 +282,7 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
         while ( arquivo.compare("NODE_COORD_SECTION") != 0 ) {
             in >> arquivo;
         }
-        // ler coordenadas
+
         int tempCity;
         for ( int i = 1; i < N+1; i++ ) {
             in >> tempCity >> x[i] >> y[i];
@@ -303,7 +293,6 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
 
         CalcLatLong ( x, y, N, latitude, longitude );
 
-        // Calcular Matriz Distancia
         for ( int i = 1; i < N+1; i++ ) {
             for ( int j = 1; j < N+1; j++ ) {
                 dist[i][j] = CalcDistGeo ( latitude, longitude, i, j );
@@ -329,7 +318,6 @@ void readData( int argc, char** argv, int* Dimension, double ***Mdist )
             y[i]=tempY[i];
         }
 
-        // Calcular Matriz Distancia (Pesudo-Euclidiana)
         for ( int i = 1; i < N+1; i++ ) {
             for ( int j = 1; j < N+1; j++ ) {
                 dist[i][j] = CalcDistAtt ( x, y, i, j );
@@ -359,7 +347,7 @@ double CalcDistEuc ( double *X, double *Y, int I, int J )
 
 double CalcDistAtt ( double *X, double *Y, int I, int J )
 {
-    // Calcula Pseudo Distancia Euclidiana
+
     double rij, tij, dij;
 
     rij = sqrt ( ( pow ( X[I] - X[J], 2 ) + pow ( Y[I] - Y[J], 2 ) ) / 10 );

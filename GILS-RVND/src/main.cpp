@@ -8,588 +8,554 @@
 
 using namespace std;
 
-double ** matrizAdj; //Matriz de adjacencia
-int dimension; //Quantidade total de vertices
+double ** distanceMatrix; // Matrix with distances
+int dimension; // Vertices number
 
 struct insertionInfo{
-  int noInserido; //Cidade inserida
-  int arestaRemovida; 
-  double custo;
+  int insertedNode;
+  int deletedEdge; 
+  double cost;
 };
 
-struct vizinhoInfo{
-  int iMenor;
-  int jMenor;
-  double custoMenor;
+struct neighborInfo{
+  int iBest;
+  int jBest;
+  double bestCost;
 };
 
 //Função de comparação utilizada para ordenar o vetor na construção:
 bool comparacao(insertionInfo a, insertionInfo b){
-  
-  return a.custo < b.custo;
-  
+  return a.cost < b.cost;
 }
 
 //Função que calcula a distancia total do percurso em questao:
-double percursoTotal(vector <int> solucao){
-  double percursoTotal = 0;
+double calculateCost(vector <int> solution){
+  double cost = 0;
 	
-  for(int i = 0; i < solucao.size()-1; i++){
-	  percursoTotal = percursoTotal + matrizAdj[solucao[i]][solucao[i+1]];
+  for(int i = 0; i < solution.size()-1; i++){
+	  cost = cost + distanceMatrix[solution[i]][solution[i+1]];
   }
 	
-  return percursoTotal;
+  return cost;
 }
 
-//Estrutura de vizinhança swap:
-vizinhoInfo swap(vector <int> &solucaoInicial){
-  double delta, deltaParcial;
-  int tam = solucaoInicial.size();
-  vizinhoInfo melhorVizinho;
-  melhorVizinho.custoMenor = DBL_MAX;
+neighborInfo swap(vector <int> &initialSolution){
+  int size = initialSolution.size();
+  double delta, partialDelta;
+
+  neighborInfo bestNeighbor;
+  bestNeighbor.bestCost = DBL_MAX;
     
-  for(int i = 1; i < tam-2; i++){
-    deltaParcial = -(matrizAdj[solucaoInicial[i]][solucaoInicial[i+1]] + matrizAdj[solucaoInicial[i]][solucaoInicial[i-1]]);
-    for(int j = i + 1; j < tam-1; j++){
-      delta = deltaParcial;
+  for(int i = 1; i < size-2; i++){
+    partialDelta = -(distanceMatrix[initialSolution[i]][initialSolution[i+1]] + distanceMatrix[initialSolution[i]][initialSolution[i-1]]);
+
+    for(int j = i + 1; j < size-1; j++){
+      delta = partialDelta;
    	
-	//Calculo da diferença entre solução inicial e vizinha:       	
+	    // Diference from initial solution and neighbor      	
       if(j == i + 1){
-        delta += matrizAdj[solucaoInicial[i]][solucaoInicial[j+1]] + matrizAdj[solucaoInicial[j]][solucaoInicial[i-1]] + matrizAdj[solucaoInicial[i]][solucaoInicial[i+1]] - matrizAdj[solucaoInicial[j]][solucaoInicial[j+1]];
+        delta += distanceMatrix[initialSolution[i]][initialSolution[j+1]] + distanceMatrix[initialSolution[j]][initialSolution[i-1]] + distanceMatrix[initialSolution[i]][initialSolution[i+1]] - distanceMatrix[initialSolution[j]][initialSolution[j+1]];
       }else {
-        delta += matrizAdj[solucaoInicial[i]][solucaoInicial[j+1]] + matrizAdj[solucaoInicial[i]][solucaoInicial[j-1]] + matrizAdj[solucaoInicial[j]][solucaoInicial[i+1]] + matrizAdj[solucaoInicial[j]][solucaoInicial[i-1]] - matrizAdj[solucaoInicial[j]][solucaoInicial[j+1]] - matrizAdj[solucaoInicial[j]][solucaoInicial[j-1]];
+        delta += distanceMatrix[initialSolution[i]][initialSolution[j+1]] + distanceMatrix[initialSolution[i]][initialSolution[j-1]] + distanceMatrix[initialSolution[j]][initialSolution[i+1]] + distanceMatrix[initialSolution[j]][initialSolution[i-1]] - distanceMatrix[initialSolution[j]][initialSolution[j+1]] - distanceMatrix[initialSolution[j]][initialSolution[j-1]];
       }
             
-      if(delta < melhorVizinho.custoMenor){
-        melhorVizinho.custoMenor = delta;
-        melhorVizinho.iMenor = i;
-        melhorVizinho.jMenor = j;
-        
-      }           	
+      if(delta < bestNeighbor.bestCost){
+        bestNeighbor.bestCost = delta;
+        bestNeighbor.iBest = i;
+        bestNeighbor.jBest = j; 
+      }
     }
   }
 
-  return melhorVizinho;	
-
+  return bestNeighbor;	
 }
 
-//Estrutura de vizinhança reinsertion:
-vizinhoInfo reinsertion(vector <int> &solucaoInicial){
-  double delta, deltaParcial;
-  int tam = solucaoInicial.size();
-  vizinhoInfo melhorVizinho;
-  melhorVizinho.custoMenor = DBL_MAX;
+neighborInfo reinsertion(vector <int> &initialSolution){
+  int size = initialSolution.size();
+  double delta, partialDelta;
 
- for(int i = 1; i < tam-2; i++){
-   deltaParcial = matrizAdj[solucaoInicial[i-1]][solucaoInicial[i+1]] - matrizAdj[solucaoInicial[i]][solucaoInicial[i-1]] - matrizAdj[solucaoInicial[i]][solucaoInicial[i+1]];
-    for(int j = i + 1; j < tam-1; j++){
-      delta = deltaParcial;
+  neighborInfo bestNeighbor;
+  bestNeighbor.bestCost = DBL_MAX;
+
+ for(int i = 1; i < size-2; i++){
+   partialDelta = distanceMatrix[initialSolution[i-1]][initialSolution[i+1]] - distanceMatrix[initialSolution[i]][initialSolution[i-1]] - distanceMatrix[initialSolution[i]][initialSolution[i+1]];
+
+    for(int j = i + 1; j < size-1; j++){
+      delta = partialDelta;
 
       if(j == i + 1){
-        delta += matrizAdj[solucaoInicial[i]][solucaoInicial[j+1]] + matrizAdj[solucaoInicial[j]][solucaoInicial[i-1]] - matrizAdj[solucaoInicial[j]][solucaoInicial[j+1]] - matrizAdj[solucaoInicial[i-1]][solucaoInicial[i+1]] + matrizAdj[solucaoInicial[i]][solucaoInicial[i+1]];
+        delta += distanceMatrix[initialSolution[i]][initialSolution[j+1]] + distanceMatrix[initialSolution[j]][initialSolution[i-1]] - distanceMatrix[initialSolution[j]][initialSolution[j+1]] - distanceMatrix[initialSolution[i-1]][initialSolution[i+1]] + distanceMatrix[initialSolution[i]][initialSolution[i+1]];
       } else {
-        delta += matrizAdj[solucaoInicial[i]][solucaoInicial[j]] + matrizAdj[solucaoInicial[i]][solucaoInicial[j+1]] - matrizAdj[solucaoInicial[j]][solucaoInicial[j+1]];
+        delta += distanceMatrix[initialSolution[i]][initialSolution[j]] + distanceMatrix[initialSolution[i]][initialSolution[j+1]] - distanceMatrix[initialSolution[j]][initialSolution[j+1]];
       }
 
-      if(delta < melhorVizinho.custoMenor){
-        melhorVizinho.iMenor = i;
-        melhorVizinho.jMenor = j;  
-        melhorVizinho.custoMenor = delta;
+      if(delta < bestNeighbor.bestCost){
+        bestNeighbor.iBest = i;
+        bestNeighbor.jBest = j;  
+        bestNeighbor.bestCost = delta;
       }	
     }
   }
 
-  for(int j = 1; j < tam-2; j++){
-    deltaParcial = -(matrizAdj[solucaoInicial[j]][solucaoInicial[j-1]]);
-    for(int i = j + 1; i < tam-1; i++){
-      delta = deltaParcial;
+  for(int j = 1; j < size-2; j++){
+    partialDelta = -(distanceMatrix[initialSolution[j]][initialSolution[j-1]]);
+
+    for(int i = j + 1; i < size-1; i++){
+      delta = partialDelta;
 
       if(i == j + 1){
-        delta += matrizAdj[solucaoInicial[j]][solucaoInicial[i+1]] + matrizAdj[solucaoInicial[i]][solucaoInicial[j-1]] - matrizAdj[solucaoInicial[i]][solucaoInicial[i+1]];
+        delta += distanceMatrix[initialSolution[j]][initialSolution[i+1]] + distanceMatrix[initialSolution[i]][initialSolution[j-1]] - distanceMatrix[initialSolution[i]][initialSolution[i+1]];
       } else {
-        delta += matrizAdj[solucaoInicial[i-1]][solucaoInicial[i+1]] + matrizAdj[solucaoInicial[i]][solucaoInicial[j]] + matrizAdj[solucaoInicial[i]][solucaoInicial[j-1]] - matrizAdj[solucaoInicial[i]][solucaoInicial[i-1]] - matrizAdj[solucaoInicial[i]][solucaoInicial[i+1]];
+        delta += distanceMatrix[initialSolution[i-1]][initialSolution[i+1]] + distanceMatrix[initialSolution[i]][initialSolution[j]] + distanceMatrix[initialSolution[i]][initialSolution[j-1]] - distanceMatrix[initialSolution[i]][initialSolution[i-1]] - distanceMatrix[initialSolution[i]][initialSolution[i+1]];
       }
 
-      if(delta < melhorVizinho.custoMenor){
-
-        melhorVizinho.iMenor = i;
-        melhorVizinho.jMenor = j;  
-        melhorVizinho.custoMenor = delta;
+      if(delta < bestNeighbor.bestCost){
+        bestNeighbor.iBest = i;
+        bestNeighbor.jBest = j;  
+        bestNeighbor.bestCost = delta;
       }	
     }
   }
 
-return melhorVizinho;
-
+  return bestNeighbor;
 }
 
-//Estrutura de vizinhança 2-opt:
-vizinhoInfo inversao(vector <int> &solucaoInicial){
-  double delta, deltaParcial;
-  int tam = solucaoInicial.size();
-  vizinhoInfo melhorVizinho;
-  melhorVizinho.custoMenor = DBL_MAX;
+neighborInfo twoOpt(vector <int> &initialSolution){
+  int size = initialSolution.size();
+  double delta, partialDelta;
+  
+  neighborInfo bestNeighbor;
+  bestNeighbor.bestCost = DBL_MAX;
 
-  for(int i = 1; i < tam; i++){
-    deltaParcial = -(matrizAdj[solucaoInicial[i-1]][solucaoInicial[i]]);
-    for(int j = i + 1; j < tam-1; j++){
-      delta = deltaParcial;
+  for(int i = 1; i < size; i++){
+    partialDelta = -(distanceMatrix[initialSolution[i-1]][initialSolution[i]]);
+
+    for(int j = i + 1; j < size-1; j++){
+      delta = partialDelta;
+	            		  		
+	    delta += distanceMatrix[initialSolution[i-1]][initialSolution[j]] + distanceMatrix[initialSolution[j+1]][initialSolution[i]] - distanceMatrix[initialSolution[j]][initialSolution[j+1]];
 	            		
-	    //Calculo da diferença entre solução inicial e vizinha:    		
-	    delta += matrizAdj[solucaoInicial[i-1]][solucaoInicial[j]] + matrizAdj[solucaoInicial[j+1]][solucaoInicial[i]] - matrizAdj[solucaoInicial[j]][solucaoInicial[j+1]];
-	            		
-	    if(delta < melhorVizinho.custoMenor){
+	    if(delta < bestNeighbor.bestCost){
 	      
-        melhorVizinho.iMenor = i;
-        melhorVizinho.jMenor = j;
-        melhorVizinho.custoMenor = delta;
-	    }
-
+        bestNeighbor.iBest = i;
+        bestNeighbor.jBest = j;
+        bestNeighbor.bestCost = delta;
+      }
     }
   }
 
-  return melhorVizinho;
-  
+  return bestNeighbor;
 }
 
-//Estrutura de vizinhança or-opt-2:
-vizinhoInfo oropt2(vector <int> &solucaoInicial){
-  double delta, deltaParcial;
-  int tam = solucaoInicial.size();
-  vizinhoInfo melhorVizinho;
-  melhorVizinho.custoMenor = DBL_MAX;
+neighborInfo oropt2(vector <int> &initialSolution){
+  int size = initialSolution.size();
+  double delta, partialDelta;
+  
+  neighborInfo bestNeighbor;
+  bestNeighbor.bestCost = DBL_MAX;
 
-  for(int i = 1; i < tam-2; i++){
-    deltaParcial = matrizAdj[solucaoInicial[i-1]][solucaoInicial[i+2]] - matrizAdj[solucaoInicial[i-1]][solucaoInicial[i]] - matrizAdj[solucaoInicial[i+1]][solucaoInicial[i+2]];
-    for(int j = 1; j <= tam-3; j++){
-      delta = deltaParcial;
+  for(int i = 1; i < size-2; i++){
+    partialDelta = distanceMatrix[initialSolution[i-1]][initialSolution[i+2]] - distanceMatrix[initialSolution[i-1]][initialSolution[i]] - distanceMatrix[initialSolution[i+1]][initialSolution[i+2]];
+
+    for(int j = 1; j <= size-3; j++){
+      delta = partialDelta;
 
       if(i != j){
-        //Calculo da diferença entre solução inicial e vizinha:           
+       
         if(i < j){
-          delta += matrizAdj[solucaoInicial[j+1]][solucaoInicial[i]] + matrizAdj[solucaoInicial[j+2]][solucaoInicial[i+1]] - matrizAdj[solucaoInicial[j+1]][solucaoInicial[j+2]];
+          delta += distanceMatrix[initialSolution[j+1]][initialSolution[i]] + distanceMatrix[initialSolution[j+2]][initialSolution[i+1]] - distanceMatrix[initialSolution[j+1]][initialSolution[j+2]];
         } else {
-          delta += matrizAdj[solucaoInicial[j]][solucaoInicial[i+1]] + matrizAdj[solucaoInicial[j-1]][solucaoInicial[i]] - matrizAdj[solucaoInicial[j]][solucaoInicial[j-1]];
+          delta += distanceMatrix[initialSolution[j]][initialSolution[i+1]] + distanceMatrix[initialSolution[j-1]][initialSolution[i]] - distanceMatrix[initialSolution[j]][initialSolution[j-1]];
         }
                   
-        if(delta < melhorVizinho.custoMenor){
+        if(delta < bestNeighbor.bestCost){
 
-          melhorVizinho.iMenor = i;	
-          melhorVizinho.jMenor = j;
-          melhorVizinho.custoMenor = delta;
+          bestNeighbor.iBest = i;	
+          bestNeighbor.jBest = j;
+          bestNeighbor.bestCost = delta;
         } 
       }
     }
   }
 
-  return melhorVizinho;
-
+  return bestNeighbor;
 }
 
-//Estrutura de vizinhança or-opt-3:
-vizinhoInfo oropt3(vector <int> &solucaoInicial){
-  double delta, deltaParcial;
-  int tam = solucaoInicial.size();
-  vizinhoInfo melhorVizinho;
-  melhorVizinho.custoMenor = DBL_MAX;
+neighborInfo oropt3(vector <int> &initialSolution){
+  int size = initialSolution.size();
+  double delta, partialDelta;
+  
+  neighborInfo bestNeighbor;
+  bestNeighbor.bestCost = DBL_MAX;
 
-  for(int i = 1; i < tam-3; i++){
-    deltaParcial = matrizAdj[solucaoInicial[i-1]][solucaoInicial[i+3]] - matrizAdj[solucaoInicial[i-1]][solucaoInicial[i]] - matrizAdj[solucaoInicial[i+2]][solucaoInicial[i+3]];
-    for(int j = 1; j <= tam-4; j++){
+  for(int i = 1; i < size-3; i++){
+    partialDelta = distanceMatrix[initialSolution[i-1]][initialSolution[i+3]] - distanceMatrix[initialSolution[i-1]][initialSolution[i]] - distanceMatrix[initialSolution[i+2]][initialSolution[i+3]];
+
+    for(int j = 1; j <= size-4; j++){
+
       if(i != j){
-        delta = deltaParcial;
+        delta = partialDelta;
 
-        //Calculo da diferença entre solução inicial e vizinha: 
 	    	if(i < j){
-          delta += matrizAdj[solucaoInicial[j+2]][solucaoInicial[i]] + matrizAdj[solucaoInicial[j+3]][solucaoInicial[i+2]] - matrizAdj[solucaoInicial[j+2]][solucaoInicial[j+3]];
+          delta += distanceMatrix[initialSolution[j+2]][initialSolution[i]] + distanceMatrix[initialSolution[j+3]][initialSolution[i+2]] - distanceMatrix[initialSolution[j+2]][initialSolution[j+3]];
 		    } else {
-          delta += matrizAdj[solucaoInicial[j]][solucaoInicial[i+2]] + matrizAdj[solucaoInicial[j-1]][solucaoInicial[i]] - matrizAdj[solucaoInicial[j-1]][solucaoInicial[j]];
+          delta += distanceMatrix[initialSolution[j]][initialSolution[i+2]] + distanceMatrix[initialSolution[j-1]][initialSolution[i]] - distanceMatrix[initialSolution[j-1]][initialSolution[j]];
         }
             		
-        if(delta < melhorVizinho.custoMenor){
-
-	        melhorVizinho.iMenor = i;
-          melhorVizinho.jMenor = j;
-          melhorVizinho.custoMenor = delta;
+        if(delta < bestNeighbor.bestCost){
+	        bestNeighbor.iBest = i;
+          bestNeighbor.jBest = j;
+          bestNeighbor.bestCost = delta;
 	    	} 
-
       }
-
     }
-
   }
 
-  return melhorVizinho;
-
+  return bestNeighbor;
 }
 
-//Função para chamar as estruturas de vizinhança:
-void RVND(vector <int> &solucao){
-  vector <int> movimentos = {0, 1, 2, 3, 4};
-  vizinhoInfo vizinho;
+void RVND(vector <int> &solution){
+  vector <int> neighborhoods = {0, 1, 2, 3, 4};
+  neighborInfo neighbor;
 
-  while(!movimentos.empty()){
-    int escolhido = rand() % movimentos.size();
+  while(!neighborhoods.empty()){
+    int choosen = rand() % neighborhoods.size();
 
-    if(movimentos[escolhido] == 0){
+    if(neighborhoods[choosen] == 0){
 
-      vizinho = swap(solucao);
+      neighbor = swap(solution);
 
-      //Realiza o movimento:
-      if(vizinho.custoMenor < 0){
+      if(neighbor.bestCost < 0){
+        int aux = solution[neighbor.iBest];
 
-        int aux = solucao[vizinho.iMenor];
-	      solucao[vizinho.iMenor] = solucao[vizinho.jMenor];
-	      solucao[vizinho.jMenor] = aux;
+	      solution[neighbor.iBest] = solution[neighbor.jBest];
+	      solution[neighbor.jBest] = aux;
 
-        movimentos = {0, 1, 2, 3, 4};
+        neighborhoods = {0, 1, 2, 3, 4};
 
       }else {
-        movimentos.erase(movimentos.begin() + escolhido);
+        neighborhoods.erase(neighborhoods.begin() + choosen);
       }
 
-    }else if(movimentos[escolhido] == 1){
+    }else if(neighborhoods[choosen] == 1){
 
-      vizinho = reinsertion(solucao);
+      neighbor = reinsertion(solution);
 
-      if(vizinho.custoMenor < 0){
-        vector <int> solucaoInicial = solucao;
+      if(neighbor.bestCost < 0){
+        vector <int> solucaoInicial = solution;
 
-        solucao.erase(solucao.begin()+vizinho.iMenor);
-        solucao.insert(solucao.begin()+vizinho.jMenor, solucaoInicial[vizinho.iMenor]);
+        solution.erase(solution.begin()+neighbor.iBest);
+        solution.insert(solution.begin()+neighbor.jBest, solucaoInicial[neighbor.iBest]);
 
-        movimentos = {0, 1, 2, 3, 4};
+        neighborhoods = {0, 1, 2, 3, 4};
+
       }else {
-        movimentos.erase(movimentos.begin() + escolhido);
+        neighborhoods.erase(neighborhoods.begin() + choosen);
       }
 
-    }else if(movimentos[escolhido] == 2){
+    }else if(neighborhoods[choosen] == 2){
 
-      vizinho = inversao(solucao);
+      neighbor = twoOpt(solution);
 
-      if(vizinho.custoMenor < 0){
-        int aux, k = vizinho.jMenor - vizinho.iMenor;
+      if(neighbor.bestCost < 0){
+        int aux, k = neighbor.jBest - neighbor.iBest;
 
         if(k % 2 != 0){
           k = k + 1;
         }
 
         for(int q = 0; q < k/2; q++){
-          aux = solucao[vizinho.iMenor+q];
-          solucao[vizinho.iMenor+q] = solucao[vizinho.jMenor-q];
-          solucao[vizinho.jMenor-q] = aux;
+          aux = solution[neighbor.iBest + q];
+          solution[neighbor.iBest + q] = solution[neighbor.jBest - q];
+          solution[neighbor.jBest - q] = aux;
         }
 
-        movimentos = {0, 1, 2, 3, 4};
+        neighborhoods = {0, 1, 2, 3, 4};
 
       } else {
-        movimentos.erase(movimentos.begin() + escolhido);
+        neighborhoods.erase(neighborhoods.begin() + choosen);
       }
 
-    }else if(movimentos[escolhido] == 3){
+    }else if(neighborhoods[choosen] == 3){
 
-      vizinho = oropt2(solucao);
+      neighbor = oropt2(solution);
 
-      //Realiza o movimento:
-      if(vizinho.custoMenor < 0){
-        if(vizinho.iMenor < vizinho.jMenor){
-          solucao.insert(solucao.begin() + vizinho.jMenor + 2, solucao[vizinho.iMenor]); 
-          solucao.insert(solucao.begin() + vizinho.jMenor + 3, solucao[vizinho.iMenor+1]); 
-          solucao.erase(solucao.begin() + vizinho.iMenor);
-          solucao.erase(solucao.begin() + vizinho.iMenor);
+      if(neighbor.bestCost < 0){
+
+        if(neighbor.iBest < neighbor.jBest){
+          solution.insert(solution.begin() + neighbor.jBest + 2, solution[neighbor.iBest]); 
+          solution.insert(solution.begin() + neighbor.jBest + 3, solution[neighbor.iBest+1]); 
+          solution.erase(solution.begin() + neighbor.iBest);
+          solution.erase(solution.begin() + neighbor.iBest);
         } else {
-          solucao.insert(solucao.begin() + vizinho.jMenor, solucao[vizinho.iMenor]); 
-          solucao.insert(solucao.begin() + vizinho.jMenor + 1, solucao[vizinho.iMenor + 2]); 
-          solucao.erase(solucao.begin() + vizinho.iMenor + 2);
-          solucao.erase(solucao.begin() + vizinho.iMenor + 2);
+          solution.insert(solution.begin() + neighbor.jBest, solution[neighbor.iBest]); 
+          solution.insert(solution.begin() + neighbor.jBest + 1, solution[neighbor.iBest + 2]); 
+          solution.erase(solution.begin() + neighbor.iBest + 2);
+          solution.erase(solution.begin() + neighbor.iBest + 2);
         }
 
-        movimentos = {0, 1, 2, 3, 4};
+        neighborhoods = {0, 1, 2, 3, 4};
+
       } else {
-        movimentos.erase(movimentos.begin() + escolhido);
+        neighborhoods.erase(neighborhoods.begin() + choosen);
+
       }   
 
-    }else if(movimentos[escolhido] == 4){
+    }else if(neighborhoods[choosen] == 4){
 
-      vizinho = oropt3(solucao);
+      neighbor = oropt3(solution);
 
-      //Realiza o movimento:
-      if(vizinho.custoMenor < 0){
-        if(vizinho.iMenor < vizinho.jMenor){
-          solucao.insert(solucao.begin() + vizinho.jMenor + 3, solucao[vizinho.iMenor]);
-          solucao.insert(solucao.begin() + vizinho.jMenor + 4, solucao[vizinho.iMenor+1]); 
-          solucao.insert(solucao.begin() + vizinho.jMenor + 5, solucao[vizinho.iMenor+2]);
-          solucao.erase(solucao.begin() + vizinho.iMenor);
-          solucao.erase(solucao.begin() + vizinho.iMenor);
-          solucao.erase(solucao.begin() + vizinho.iMenor);
+      if(neighbor.bestCost < 0){
+
+        if(neighbor.iBest < neighbor.jBest){
+          solution.insert(solution.begin() + neighbor.jBest + 3, solution[neighbor.iBest]);
+          solution.insert(solution.begin() + neighbor.jBest + 4, solution[neighbor.iBest+1]); 
+          solution.insert(solution.begin() + neighbor.jBest + 5, solution[neighbor.iBest+2]);
+          solution.erase(solution.begin() + neighbor.iBest);
+          solution.erase(solution.begin() + neighbor.iBest);
+          solution.erase(solution.begin() + neighbor.iBest);
         } else {
-          solucao.insert(solucao.begin() + vizinho.jMenor, solucao[vizinho.iMenor]);
-          solucao.insert(solucao.begin() + vizinho.jMenor + 1, solucao[vizinho.iMenor + 2]); 
-          solucao.insert(solucao.begin() + vizinho.jMenor + 2, solucao[vizinho.iMenor + 4]); 
-          solucao.erase(solucao.begin() + vizinho.iMenor + 3);
-          solucao.erase(solucao.begin() + vizinho.iMenor + 3);
-          solucao.erase(solucao.begin() + vizinho.iMenor + 3);
+          solution.insert(solution.begin() + neighbor.jBest, solution[neighbor.iBest]);
+          solution.insert(solution.begin() + neighbor.jBest + 1, solution[neighbor.iBest + 2]); 
+          solution.insert(solution.begin() + neighbor.jBest + 2, solution[neighbor.iBest + 4]); 
+          solution.erase(solution.begin() + neighbor.iBest + 3);
+          solution.erase(solution.begin() + neighbor.iBest + 3);
+          solution.erase(solution.begin() + neighbor.iBest + 3);
         }
 
-        movimentos = {0, 1, 2, 3, 4};
+        neighborhoods = {0, 1, 2, 3, 4};
+
       } else {
-        movimentos.erase(movimentos.begin() + escolhido);
+        neighborhoods.erase(neighborhoods.begin() + choosen);
       }
-      
     }
   }
 }
 
-vector <int> pertub(vector <int> solucaoInicial){
-	vector <int> solucaoModificada;
-	vector <int> subsequencia1;
-	vector <int> subsequencia2;
-	int i, j, tam1 = 0, tam2 = 0, tam = solucaoInicial.size();
+vector <int> pertub(vector <int> solution){
+	vector <int> newSolution;
+	vector <int> firstSubsequence;
+	vector <int> secondSubsequence;
+	int i, j, sizeFirst = 0, sizeSecond = 0, size = solution.size();
 	
-	//Gera tamanho das subsequencias:
-	if(tam < 20){
-		tam1 = 2;
-		tam2 = 2;
+	// Generates subsequence sizes
+	if(size < 20){
+		sizeFirst = 2;
+		sizeSecond = 2;
 	} else {
-		while(tam1 < 2 || tam1 > (tam/10)){
-			tam1 = rand() % tam;
-		}
+		while(sizeFirst < 2 || sizeFirst > (size/10)) sizeFirst = rand() % size;
+		while(sizeSecond < 2 || sizeSecond > (size/10)) sizeSecond = rand() % size; 
+	}
+	
+	// Generates initial position of first subsequence
+	i = rand() % (size - sizeFirst);
+  while(i == 0) i = rand() % (size - sizeFirst);
 
-		while(tam2 < 2 || tam2 > (tam/10)){
-			tam2 = rand() % tam;
+	// Generates initial position of second subsequence
+	j = rand() % (size - sizeSecond);
+	while((j > (i - sizeSecond) && j < (i + sizeFirst)) || j == 0) j = rand() % (size - sizeSecond);
+
+	// Creates vector with first subsequence
+	int iter = 0;
+	for(int k = 0; k < size; k++){
+		if(k >= i){
+			firstSubsequence.push_back(solution[k]);
+      iter++;
+			if(iter == sizeFirst) break;
 		}
 	}
 	
-	//Gera posição incial da subsequencia 1:
-	i = rand() % (tam - tam1);
-  	while(i == 0){
-    		i = rand() % (tam - tam1);
-  	}
-
-	//Gera posição incial da subsequencia 2:
-	j = rand() % (tam - tam2);
-	while((j > (i - tam2) && j < (i + tam1)) || j == 0){
-		j = rand() % (tam - tam2);
-	}
-
-	//Cria um vetor da subsequencia 1:
-	int contadorIteracoes = 0;
-	for(int q = 0; q < tam; q++){
-		if(q >= i){
-			subsequencia1.push_back(solucaoInicial[q]);
-      contadorIteracoes++;
-			if(contadorIteracoes == tam1){
-				break;
-			}
-		}
-	}
-	
-	//Cria um vetor da subsequencia 2:
-	contadorIteracoes = 0;
-	for(int q = 0; q < tam; q++){
-		if(q >= j){
-			subsequencia2.push_back(solucaoInicial[q]);
-      contadorIteracoes++;
-			if(contadorIteracoes == tam2){
-				break;
-			}
+	// Creates vector with second subsequence
+	iter = 0;
+	for(int k = 0; k < size; k++){
+		if(k >= j){
+			secondSubsequence.push_back(solution[k]);
+      iter++;
+			if(iter == sizeSecond) break;
 		}
 	}
 
 	if(j < i){	
-    //Apaga subsequencia 1:
-    solucaoModificada = solucaoInicial;
-    int apagados = 0;
-    for(int q = 0; q < tam; q++){
-      if(q >= i){
-        solucaoModificada.erase(solucaoModificada.begin() + q - apagados);
-        apagados++;
-        if(apagados == tam1){
-          break;
-        }
+    newSolution = solution;
+
+    // Deletes first subsequence
+    int deleted = 0;
+    for(int k = 0; k < size; k++){
+      if(k >= i){
+        newSolution.erase(newSolution.begin() + k - deleted);
+        deleted++;
+        if(deleted == sizeFirst) break;
       }
     }
 
-    //Apaga subsequencia 2:
-    apagados = 0;
-    for(int q = 0; q < tam; q++){
-      if(q >= j){
-        solucaoModificada.erase(solucaoModificada.begin() + q - apagados);
-        apagados++;
-        if(apagados == tam2){
-          break;
-        }
+    // Deletes second subsequence
+    deleted = 0;
+    for(int k = 0; k < size; k++){
+      if(k >= j){
+        newSolution.erase(newSolution.begin() + k - deleted);
+        deleted++;
+        if(deleted == sizeSecond) break;
       }
     }
 
-    //Insere subsequencia 2 no lugar da 1:
-    int colocados = 0;
-    for(int q = 0; q < subsequencia2.size(); q++){
-      solucaoModificada.insert(solucaoModificada.begin() + i + colocados - tam2, subsequencia2[q]);
-      colocados++;
+    // Inserts second subsequence
+    int inserted = 0;
+    for(int k = 0; k < secondSubsequence.size(); k++){
+      newSolution.insert(newSolution.begin() + i + inserted - sizeSecond, secondSubsequence[k]);
+      inserted++;
     }
         
-    //Insere subsequencia 1 no lugar da 2:
-    colocados = 0;
-    for(int q = 0; q < subsequencia1.size(); q++){
-      solucaoModificada.insert(solucaoModificada.begin() + j + colocados, subsequencia1[q]);
-      colocados++;
+    // Inserts first subsequence
+    inserted = 0;
+    for(int k = 0; k < firstSubsequence.size(); k++){
+      newSolution.insert(newSolution.begin() + j + inserted, firstSubsequence[k]);
+      inserted++;
     }
       
 	} else {
-    //Apaga subsequencia 1:
-    solucaoModificada = solucaoInicial;
-    int apagados = 0;
-    for(int q = 0; q < tam; q++){
-      if(q >= j){
-        solucaoModificada.erase(solucaoModificada.begin() + q - apagados);
-        apagados++;
-        if(apagados == tam2){
-          break;
-        }
+    newSolution = solution;
+
+    // Deletes second subsequence
+    int deleted = 0;
+    for(int k = 0; k < size; k++){
+      if(k >= j){
+        newSolution.erase(newSolution.begin() + k - deleted);
+        deleted++;
+        if(deleted == sizeSecond) break;
       }
     }
 
-    //Apaga subsequencia 2:
-    apagados = 0;
-    for(int q = 0; q < tam; q++){
-      if(q >= i){
-        solucaoModificada.erase(solucaoModificada.begin() + q - apagados);
-        apagados++;
-        if(apagados == tam1){
-          break;
-        }
+    // Deletes first subsequence
+    deleted = 0;
+    for(int k = 0; k < size; k++){
+      if(k >= i){
+        newSolution.erase(newSolution.begin() + k - deleted);
+        deleted++;
+        if(deleted == sizeFirst) break; 
       }
 	  }
 
-    //Insere subsequencia 1 no lugar da 2:
-    int colocados = 0;
-    for(int q = 0; q < subsequencia1.size(); q++){
-      solucaoModificada.insert(solucaoModificada.begin() + j + colocados - tam1, subsequencia1[q]);
-      colocados++;
+    // Inserts first subsequence
+    int inserted = 0;
+    for(int k = 0; k < firstSubsequence.size(); k++){
+      newSolution.insert(newSolution.begin() + j + inserted - sizeFirst, firstSubsequence[k]);
+      inserted++;
     }
         
-    //Insere subsequencia 2 no lugar da 1:
-    colocados = 0;
-    for(int q = 0; q < subsequencia2.size(); q++){
-      solucaoModificada.insert(solucaoModificada.begin() + i + colocados, subsequencia2[q]);
-      colocados++;
+    // Inserts second subsequence
+    inserted = 0;
+    for(int k = 0; k < secondSubsequence.size(); k++){
+      newSolution.insert(newSolution.begin() + i + inserted, secondSubsequence[k]);
+      inserted++;
     }
   }
 		
-	return solucaoModificada;	
+	return newSolution;	
 }
 
-//Função de construção da solução inicial:
-vector <int> construcao(double valorAleatorio, vector <int> listaCandidatos){
-  vector <int> s;
+vector <int> construction(double alpha, vector <int> candidatesList){
+  vector <int> solution;
 
-  //Insere o depósito no percurso: 
-  s.push_back(listaCandidatos[0]);
-  s.push_back(listaCandidatos[0]);
-  listaCandidatos.erase(listaCandidatos.begin());
+  // Insert depot
+  solution.push_back(candidatesList[0]);
+  solution.push_back(candidatesList[0]);
+  candidatesList.erase(candidatesList.begin());
     
-  //Cidades do subtour sao escolhidas aleatoriamente:
-  for(int j = 0; j < 3; j++){
-    int l = rand() % listaCandidatos.size(); //Nó aleatório é escolhido
-    s.insert(s.begin()+1, listaCandidatos[l]); 
-    listaCandidatos.erase(listaCandidatos.begin()+l);
+  // Subtours is randomly generated
+  for(int i = 0; i < 3; i++){
+    int index = rand() % candidatesList.size(); // Choose random node
+    solution.insert(solution.begin()+1, candidatesList[index]); 
+    candidatesList.erase(candidatesList.begin() + index);
   }
 
-  //Calcula os custo de insercao de cada cidade em s (percurso):
-  while(!listaCandidatos.empty()){
-    vector <insertionInfo> custoInsercao((s.size()-1) * listaCandidatos.size());
-    for(int j = 0, l = 1, q = 0; j < s.size() - 1; j++, l++){
-      for(auto k : listaCandidatos){
-        custoInsercao[q].custo = matrizAdj[s[j]][k] + matrizAdj[s[l]][k] - matrizAdj[s[j]][s[l]];
-        custoInsercao[q].noInserido = k;
-        custoInsercao[q].arestaRemovida = j;
-        q++;
+  // Calculates insertion cost of vertices on solution
+  while(!candidatesList.empty()){
+    vector <insertionInfo> insertionCost((solution.size()-1) * candidatesList.size());
+
+    for(int i = 0, j = 1, k = 0; i < solution.size()-1; i++, j++){
+      for(auto l : candidatesList){
+        insertionCost[k].cost = distanceMatrix[solution[i]][l] + distanceMatrix[solution[j]][l] - distanceMatrix[solution[i]][solution[j]];
+        insertionCost[k].insertedNode = l;
+        insertionCost[k].deletedEdge = i;
+        k++;
       }
     }
 
-    //Ordena os custos de insercao em ordem crescente:
-    sort(custoInsercao.begin(), custoInsercao.end(), comparacao);
+    // Orders insertion costs
+    sort(insertionCost.begin(), insertionCost.end(), comparacao);
 
-    //Gera quantidade de elementos iniciais a serem escolhidos aleatoriamente no percurso:
-    int primeirosElementos = valorAleatorio * custoInsercao.size();
-    int l = rand() % primeirosElementos;
+    int firstElements = alpha * insertionCost.size();
+    int index = rand() % firstElements;
 
-    //Insere nó escolhido no percuso:
-    s.insert(s.begin() + (custoInsercao[l].arestaRemovida + 1), custoInsercao[l].noInserido);
+    // Inserts choosen node
+    solution.insert(solution.begin() + (insertionCost[index].deletedEdge + 1), insertionCost[index].insertedNode);
 
-    //Apaga da lista de candidatos o nó que foi inserido:
-    for(int q = 0; q < listaCandidatos.size(); q++){
-      if(listaCandidatos[q] == custoInsercao[l].noInserido)
-        listaCandidatos.erase(listaCandidatos.begin()+q);
-
+    // Deletes inserted node from candidates list
+    for(int i = 0; i < candidatesList.size(); i++){
+      if(candidatesList[i] == insertionCost[index].insertedNode)
+        candidatesList.erase(candidatesList.begin()+i);
     }
 
   }
         
-  return s;
+  return solution;
 }
 
-//Função com algoritmo principal:
-double tsp(int iIls, int v){
-  double distanciaFinal = DBL_MAX;
-  vector <int> solucaoFinal;
-  vector <int> cidades;
+double search(int iIls, int dimension){
+  double finalCost = DBL_MAX;
+  vector <int> finalSolution;
+  vector <int> vertices;
 
-  //Gera vetor com cidades:
-  for(int i = 1; i <= v; i++){
-    cidades.push_back(i);
+  // Creates vector with vertices
+  for(int i = 0; i < dimension; i++){
+    vertices.push_back(i+1);
   }
 
   for(int iterMax = 0; iterMax < 50; iterMax++){
-    double valorAleatorio = (rand() % 90) / 100.0 + 0.1;
-    double distanciaS, distanciaSolucao = DBL_MAX;
+    double alpha = (rand() % 90) / 100.0 + 0.1;
+    double currentCost, bestCurrentCost = DBL_MAX;
     
-    vector <int> s = construcao(valorAleatorio, cidades); //Fase de construção da solução inicial
-    vector <int> solucao = s;
+    vector <int> currentSolution = construction(alpha, vertices); // Generates initial solution
+    vector <int> bestCurrentSolution = currentSolution;
 
     int iterIls = 0;
     while(iterIls < iIls){
-      RVND(s);
 
-      distanciaS = percursoTotal(s);
+      RVND(currentSolution);
+      currentCost = calculateCost(currentSolution);
 
-      if(distanciaS < distanciaSolucao){
-        solucao = s;
+      if(currentCost < bestCurrentCost){
+        bestCurrentSolution = currentSolution;
+        bestCurrentCost = calculateCost(bestCurrentSolution);
         iterIls = 0;
-        distanciaSolucao = percursoTotal(solucao);
       }
 
-      s = pertub(solucao);
-
+      currentSolution = pertub(bestCurrentSolution);
       iterIls++;
 
     }
 
-    if(distanciaSolucao < distanciaFinal){
-      solucaoFinal = solucao;
-      distanciaFinal = distanciaSolucao;
+    if(bestCurrentCost < finalCost){
+      finalSolution = bestCurrentSolution;
+      finalCost = bestCurrentCost;
     }
     	  
   }
 
-  cout << endl;
-
-  cout << "Percurso final: ";
-  for(int i = 0; i < solucaoFinal.size(); i++){
-    printf("%d ", solucaoFinal[i]);
+  cout << endl << "Solution: ";
+  for(int i = 0; i < finalSolution.size(); i++){
+    cout << finalSolution[i] << " ";
   }
 
-  return distanciaFinal;
+  return finalCost;
   
 }
 
 int main(int argc, char** argv) {
-  //Inicio da contagem do tempo:  
-  clock_t inicio = clock();
+ 
+  clock_t start = clock(); // Starts time counting
     
-  readData(argc, argv, &dimension, &matrizAdj);
-
+  readData(argc, argv, &dimension, &distanceMatrix);
   srand(time(NULL));
 
   int iIls;
@@ -600,16 +566,14 @@ int main(int argc, char** argv) {
     iIls = dimension;
   }
 
-  double custoFinal = tsp(iIls, dimension);
+  double cost = search(iIls, dimension);
 
-  //Fim da contagem do tempo:
-  clock_t fim = clock();
-  double tempo = ((double) (fim - inicio)) / CLOCKS_PER_SEC;
+  // Ends time counting
+  clock_t end = clock();
+  double time = ((double) (end - start)) / CLOCKS_PER_SEC;
 
-  cout << endl;
-  cout << "Custo: " << custoFinal << endl;
-  cout << "Tempo: " << tempo << endl;
-  cout << endl;
+  cout << endl << "Cost: " << cost << endl;
+  cout << "Time: " << time << endl << endl;
     
   return 0;
 
