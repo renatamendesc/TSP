@@ -23,12 +23,11 @@ struct neighborInfo{
   double bestCost;
 };
 
-//Função de comparação utilizada para ordenar o vetor na construção:
-bool comparacao(insertionInfo a, insertionInfo b){
+bool compares(insertionInfo a, insertionInfo b){
   return a.cost < b.cost;
 }
 
-//Função que calcula a distancia total do percurso em questao:
+// Fuction that calculates the total cost
 double calculateCost(vector <int> solution){
   double cost = 0;
 	
@@ -482,7 +481,7 @@ vector <int> construction(double alpha, vector <int> candidatesList){
     }
 
     // Orders insertion costs
-    sort(insertionCost.begin(), insertionCost.end(), comparacao);
+    sort(insertionCost.begin(), insertionCost.end(), compares);
 
     int firstElements = alpha * insertionCost.size();
     int index = rand() % firstElements;
