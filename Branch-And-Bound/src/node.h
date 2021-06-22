@@ -11,25 +11,25 @@ using namespace std;
 class Node {
 
     private:
-        vector <pair <int, int>> arcosProibidos; // Lista de arcos que foram proibidos
-        vector <vector <int>> subtours; // Lista de subtours gerados pela solução do algoritmo húngaro
+        vector <pair <int, int>> illegalArcs; // Vector with illegal arcs
+        vector <vector <int>> subtours; // Vector with subtours
 
-        double lowerBound; // Resultado da solução gerada pelo algoritmo húngaro
-        int escolhido; // Subtour escolhido que terá arcos proibidos
-        bool podar; // Indica se o nó deve gerar filhos
+        double lowerBound; // Hungarian algorithm solution cost
+        int choosen; // Choosen subtour with illegal arcs
+        bool upperBound; // Indicates wether the node is an upper bound
 
     public:
-        void proibeArcos(int dimension, double ** matrizModificada, double ** matrizReal);
-        void calcularSolucao(hungarian_problem_t *p, int dimension);
-        void printSolucao(double tempo);
+        void prohibitArcs(int dimension, double ** newMatrix, double ** originalMatrix);
+        void calculateSolution(hungarian_problem_t *p, int dimension);
+        void printSolution(double time);
 
-        bool getPodar();
+        bool getUpperBound();
         double getLowerBound();
-        vector <int> getSubtourEscolhido();
-        vector <pair <int, int>> getArcosProibidos();
+        vector <int> getChoosenSubtour();
+        vector <pair <int, int>> getProhibitedArcs();
 
-        void setArcoProibido(pair <int, int> arco);
-        void setArcosProibidos(vector <pair <int, int>> arcos);
+        void setProhibitedArc(pair <int, int> arc);
+        void setProhibitedArcs(vector <pair <int, int>> arcs);
         void setLowerBound(double lowerBound);
 
 };

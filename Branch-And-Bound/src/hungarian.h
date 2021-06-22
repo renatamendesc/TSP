@@ -72,6 +72,3 @@ void hungarian_print_status(hungarian_problem_t* p);
 #endif
 
 #endif
-
-
-

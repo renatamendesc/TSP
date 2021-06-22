@@ -9,96 +9,96 @@
 
 using namespace std;
 
-// Função para especificar ordem da priority_queue, sobrecarregando o operador
+// Function to specify priority_queue's sequence
 bool operator < (Node a, Node b){
 	return a.getLowerBound() > b.getLowerBound();
 }
 
-void search(string tipo, double ** matrizReal, int dimension){
+void search(string type, double ** originalMatrix, int dimension){
 
-	clock_t inicio = clock(); // Inicia contagem do tempo
+	clock_t start = clock(); // Starts time counting
 
-	Node raiz, solucao;
+	Node root, solution;
 	hungarian_problem_t p;
 
-	vector <Node> arvore;
-	priority_queue <Node> arvoreMenorBound;
+	vector <Node> tree;
+	priority_queue <Node> bestBoundTree;
 
-	hungarian_init(&p, matrizReal, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST);
-	raiz.setLowerBound(hungarian_solve(&p));
-	raiz.calcularSolucao(&p, dimension);
+	hungarian_init(&p, originalMatrix, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST);
+	root.setLowerBound(hungarian_solve(&p));
+	root.calculateSolution(&p, dimension);
 	hungarian_free(&p);
 
 	int index;
-	double tempo, custo = __DBL_MAX__;
-	double ** matrizModificada = new double *[dimension];
+	double time, cost = __DBL_MAX__;
+	double ** newMatrix = new double *[dimension];
 
-	// Matriz modificada recebe matriz original
+	// New matrix is assigned with original matrix
 	for(int i = 0; i < dimension; i++){
-		matrizModificada[i] = new double [dimension];
+		newMatrix[i] = new double [dimension];
 
 		for(int j = 0; j < dimension; j++){
-			matrizModificada[i][j] = matrizReal[i][j];
+			newMatrix[i][j] = originalMatrix[i][j];
 		}
 	}
 
-	solucao = raiz;
+	solution = root;
 
-	if(tipo == "menorBound"){
-		arvoreMenorBound.push(raiz);
+	if(type == "bestBound"){
+		bestBoundTree.push(root);
 	} else {
-		arvore.push_back(raiz);
+		tree.push_back(root);
 	}
 
-	while(!arvore.empty() || !arvoreMenorBound.empty()){
+	while(!tree.empty() || !bestBoundTree.empty()){
 
 		Node node;
 
-		if(tipo == "menorBound"){
-			node = arvoreMenorBound.top();
-			arvoreMenorBound.pop();
+		if(type == "bestBound"){
+			node = bestBoundTree.top();
+			bestBoundTree.pop();
 			
-		}else if(tipo == "largura"){
-			node = arvore.front();
-			arvore.erase(arvore.begin());
+		}else if(type == "breadth"){
+			node = tree.front();
+			tree.erase(tree.begin());
 
-		}else if(tipo == "profundidade"){
-			node = arvore.back();
-			arvore.erase(arvore.end());
+		}else if(type == "depth"){
+			node = tree.back();
+			tree.erase(tree.end());
 
 		}
 
-		if(!node.getPodar()){
+		if(!node.getUpperBound()){
 
-			// Percorre arcos a serem proibidos
-			for(int j = 0; j < node.getSubtourEscolhido().size()-1; j++){
+			// Covers illegal arcs
+			for(int j = 0; j < node.getChoosenSubtour().size()-1; j++){
 
 				Node newNode;
-				newNode.setArcosProibidos(node.getArcosProibidos()); // Novo nó herda arcos proibidos
+				newNode.setProhibitedArcs(node.getProhibitedArcs()); // New node inherits illegal arcs
 
-				// Define o arco proibido em questão
-				pair <int, int> arco;
+				// Defines new illegal arc
+				pair <int, int> arc;
 
-				arco.first = node.getSubtourEscolhido()[j];
-				arco.second = node.getSubtourEscolhido()[j+1];
+				arc.first = node.getChoosenSubtour()[j];
+				arc.second = node.getChoosenSubtour()[j+1];
 
-				// Adiciona novo arco proibido
-				newNode.setArcoProibido(arco);
-				newNode.proibeArcos(dimension, matrizModificada, matrizReal);
+				// Adds new illegal arc
+				newNode.setProhibitedArc(arc);
+				newNode.prohibitArcs(dimension, newMatrix, originalMatrix);
 
 				hungarian_problem_t p;
-				hungarian_init(&p, matrizModificada, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST);
+				hungarian_init(&p, newMatrix, dimension, dimension, HUNGARIAN_MODE_MINIMIZE_COST);
 				newNode.setLowerBound(hungarian_solve(&p));
 
-				// Verifica se há algum upper bound menor que o lower bound encontrado
-				if(newNode.getLowerBound() < custo){
-					newNode.calcularSolucao(&p, dimension);
+				// Verifies if there's an upper bound smaller than the lower bound
+				if(newNode.getLowerBound() < cost){
+					newNode.calculateSolution(&p, dimension);
 
-					// Adiciona na árvore
-					if(tipo == "menorBound"){
-						arvoreMenorBound.push(newNode);
+					// Adds new node
+					if(type == "bestBound"){
+						bestBoundTree.push(newNode);
 					}else{
-						arvore.push_back(newNode); 
+						tree.push_back(newNode); 
 					}	
 				}
 
@@ -107,24 +107,24 @@ void search(string tipo, double ** matrizReal, int dimension){
 
 		} else {
 
-			// Verifica o melhor o custo
-			if(node.getLowerBound() < custo){
-				custo = node.getLowerBound();
-				solucao = node;
+			// Verifies best upper bound
+			if(node.getLowerBound() < cost){
+				cost = node.getLowerBound();
+				solution = node;
 			}
 
 		}
 
 		clock_t fim = clock();
-		tempo = ((double) (fim - inicio)) / CLOCKS_PER_SEC;
-		if(tempo > 600) break;
+		time = ((double) (fim - start)) / CLOCKS_PER_SEC;
+		if(time > 600) break;
 
 	}
 
-	for(int i = 0; i < dimension; i++) delete[] matrizModificada[i];
-	delete[] matrizModificada;
+	for(int i = 0; i < dimension; i++) delete[] newMatrix[i];
+	delete[] newMatrix;
 
-	solucao.printSolucao(tempo);
+	solution.printSolution(time);
 
 }
 
@@ -141,16 +141,16 @@ int main(int argc, char** argv){
 		}
 	}
 
-	double ** matrizReal = cost;
+	double ** originalMatrix = cost;
 	int selection, dimension = data->getDimension();
 
-	string tipo;
+	string type;
 
 	cout << "\n------------------------------------------------\n\n";
-	cout << "Selecione um tipo de busca:\n\n";
-	cout << "[1] Melhor bound\n";
-	cout << "[2] Largura\n";
-	cout << "[3] Profundidade\n";
+	cout << "Select a type of search:\n\n";
+	cout << "[1] Best bound\n";
+	cout << "[2] Breadth\n";
+	cout << "[3] Depth\n";
 	cout << "\n------------------------------------------------\n";
 
 	cin >> selection;
@@ -158,20 +158,20 @@ int main(int argc, char** argv){
 	switch(selection){
 
 		case 1:
-			tipo = "menorBound";
+			type = "bestBound";
 			break;
 
 		case 2:
-			tipo = "largura";
+			type = "breadth";
 			break;
 
 		case 3:
-			tipo = "profundidade";
+			type = "depth";
 			break;
 
 	}
 
-	search(tipo, matrizReal, dimension);
+	search(type, originalMatrix, dimension);
 
 	for (int i = 0; i < data->getDimension(); i++) delete [] cost[i];
 	delete [] cost;

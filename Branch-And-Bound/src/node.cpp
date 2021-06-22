@@ -1,56 +1,59 @@
 #include "node.h"
 
-void Node::proibeArcos(int dimension, double ** matrizModificada, double ** matrizReal){
+void Node::prohibitArcs(int dimension, double ** matrizModificada, double ** matrizReal){
 
-	// Matriz modificada recebe matriz original
+	// New matrix is assigned with original matrix
 	for(int i = 0; i < dimension; i++){
         for(int j = 0; j < dimension; j++){
 			matrizModificada[i][j] = matrizReal[i][j];
         }
     }
 
-	// Percorre arcos a serem proibidos
-	for(int i = 0; i < this->arcosProibidos.size(); i++){
-		// Adiciona restrição referente aos arcos proibidos
-		matrizModificada[this->arcosProibidos[i].first-1][this->arcosProibidos[i].second-1] = INFINITE;
+	// Covers illegal arcs
+	for(int i = 0; i < this->illegalArcs.size(); i++){
+		// Adds illegal arcs constraints 
+		matrizModificada[this->illegalArcs[i].first-1][this->illegalArcs[i].second-1] = INFINITE;
 	}
 
 }
 
-void Node::calcularSolucao(hungarian_problem_t *p, int dimension){
-	vector <int> listaCandidatos;
+void Node::calculateSolution(hungarian_problem_t *p, int dimension){
+	vector <int> candidatesList;
 	vector <int> subtour;
 
-	// Forma lista de candidatos
+	// Creates candidates list
 	for(int i = 0; i < dimension; i++){
-		listaCandidatos.push_back(i+1);
+		candidatesList.push_back(i+1);
 	}
 
-	// Forma solução de subtours
-	while(!listaCandidatos.empty()){
-		int i = listaCandidatos[0]-1; 
-		int inicio = i;
-		subtour.push_back(inicio + 1);
+	// Creates substours solution
+	while(!candidatesList.empty()){
+		int index, start;
+
+		index = candidatesList[0]-1;
+		start = index;
+
+		subtour.push_back(start + 1);
 
 		while(true){
-			// Apaga nó em questão da lista de candidatos
-			for(int j = 0; j < listaCandidatos.size(); j++){
-				if(listaCandidatos[j] == i+1){
-					listaCandidatos.erase(listaCandidatos.begin() + j);
+			// Deletes node from candidates list
+			for(int j = 0; j < candidatesList.size(); j++){
+				if(candidatesList[j] == index+1){
+					candidatesList.erase(candidatesList.begin() + j);
 				}
 			}
 
-			// Verifica existência do arco
+			// Verifies arc
 			for(int j = 0; j < dimension; j++){
-				if(p->assignment[i][j]){
+				if(p->assignment[index][j]){
 					subtour.push_back(j+1);
-					i = j;
+					index = j;
 					break;
 				}
 			}
 
-			// Encerra percurso do subtour
-			if(inicio == i){
+			// End of subtour
+			if(start == index){
 				this->subtours.push_back(subtour);
 				subtour.clear();
 
@@ -60,62 +63,62 @@ void Node::calcularSolucao(hungarian_problem_t *p, int dimension){
 	}
 
 	if(this->subtours.size() == 1){
-		this->podar = true;
+		this->upperBound = true;
 	}else{
-		this->podar = false;
+		this->upperBound = false;
 	}
 
-	int menorSubtour = INT_MAX;
+	int smallerSubtour = INT_MAX;
 
-	// Verifica subtour a ser escolhido
+	// Chooses smaller subtour
 	for(int i = 0; i < this->subtours.size(); i++){
-		if(this->subtours[i].size() < menorSubtour){
-			menorSubtour = this->subtours[i].size();
-			this->escolhido = i;
+		if(this->subtours[i].size() < smallerSubtour){
+			smallerSubtour = this->subtours[i].size();
+			this->choosen = i;
 		}
 	}
 }
 
-void Node::printSolucao(double tempo){
+void Node::printSolution(double time){
 
-    if(this->podar){
+    if(this->upperBound){
 
-		cout << "\nSolução: ";
+		cout << "\nSolution: ";
 		for(int i = 0; i < this->subtours[0].size(); i++)
 			cout << this->subtours[0][i] << " ";
 
-		cout << endl << "Custo: " << this->lowerBound << endl;
+		cout << endl << "Cost: " << this->lowerBound << endl;
 
 	}else{
-		cout << "Nenhuma solução viável foi encontrada!" << endl;
+		cout << "No feasible solution was found!" << endl;
 	}
 
-	cout << "Tempo: " << tempo << endl << endl;
+	cout << "Time: " << time << endl << endl;
 
 }
 
-bool Node::getPodar(){
-    return this->podar;
+bool Node::getUpperBound(){
+    return this->upperBound;
 }
 
 double Node::getLowerBound(){
     return this->lowerBound;
 }
 
-vector <int> Node::getSubtourEscolhido(){
-    return this->subtours[this->escolhido];
+vector <int> Node::getChoosenSubtour(){
+    return this->subtours[this->choosen];
 }
 
-vector <pair <int, int>> Node::getArcosProibidos(){
-    return this->arcosProibidos;
+vector <pair <int, int>> Node::getProhibitedArcs(){
+    return this->illegalArcs;
 }
 
-void Node::setArcoProibido(pair <int, int> arco){
-    this->arcosProibidos.push_back(arco);
+void Node::setProhibitedArc(pair <int, int> arc){
+    this->illegalArcs.push_back(arc);
 }
 
-void Node::setArcosProibidos(vector <pair <int, int>> arcos){
-    this->arcosProibidos = arcos;
+void Node::setProhibitedArcs(vector <pair <int, int>> arcs){
+    this->illegalArcs = arcs;
 }
 
 void Node::setLowerBound(double lowerBound){

@@ -23,7 +23,7 @@ public:
 	inline double getYCoord(int i){return yCoord[i];}
 	inline bool getExplicitCoord(){return explicitCoord; };
 
-	string getInstanceName();                    //Get instance's name
+	string getInstanceName(); // Get instance's name
 
 private:
 	string instaceName;
@@ -34,7 +34,7 @@ private:
 	double **distMatrix;
 	double *xCoord, *yCoord;
 
-	//Computing Distances
+	// Computing Distances
 	static double CalcDistEuc ( double *, double *, int , int );
 	static double CalcDistAtt ( double *, double *, int , int );
 	static double CalcDistGeo ( double *, double *, int , int );

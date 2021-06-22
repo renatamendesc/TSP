@@ -1,7 +1,7 @@
 #include "data.h"
 
 
-//Inicializador
+// Initializer
 Data::Data( int qtParam, char * instance ):
 xCoord(NULL),
 yCoord(NULL),
@@ -44,7 +44,7 @@ void Data::readData(){
 		exit( 1 );
 	}
 
-	string file, typeProblem;   //They are used into the reader
+	string file, typeProblem;   // They are used into the reader
 
 	while ( file.compare("DIMENSION:") != 0 && file.compare("DIMENSION" ) != 0 ) {
 		inTSP >> file;
@@ -52,20 +52,19 @@ void Data::readData(){
 
 	if ( file.compare("DIMENSION" ) == 0 )  inTSP >> file;
 
-	inTSP >> dimension; // valor depois do string "DIMENSION:" é a dimensão do problema
+	inTSP >> dimension;
 
 	while ( file.compare("EDGE_WEIGHT_TYPE:") != 0 && file.compare("EDGE_WEIGHT_TYPE" ) != 0 ) {
 		inTSP >> file;
 	}
 	if ( file.compare("EDGE_WEIGHT_TYPE" ) == 0 )  inTSP >> file;
 
-	inTSP >> typeProblem; //EDGE_WEIGHT_TYPE
+	inTSP >> typeProblem; // EDGE_WEIGHT_TYPE
 
-	xCoord = new double [ dimension ]; //coord x
-	yCoord = new double [ dimension ]; //coord y
+	xCoord = new double [ dimension ]; // coord x
+	yCoord = new double [ dimension ]; // coord y
 
-	// Alocar matriz 2D
-	distMatrix = new double *[ dimension ]; //memoria dinâmica (matrix 2D)
+	distMatrix = new double *[ dimension ]; // dinamic memory (matrix 2D)
 
 	for ( int i = 0; i < dimension; i++ ) {
 		distMatrix[i] = new double [ dimension ];
@@ -91,7 +90,6 @@ void Data::readData(){
 				inTSP >> file;
 			}
 
-			// Preencher Matriz Distancia
 			for ( int i = 0; i < dimension; i++ ) {
 				for ( int j = 0; j < dimension; j++ ) {
 					inTSP >> distMatrix[i][j];
@@ -108,7 +106,6 @@ void Data::readData(){
 				inTSP >> file;
 			}
 
-			// Preencher Matriz Distancia
 			for ( int i = 0; i < dimension; i++ ) {
 				for ( int j = i + 1; j < dimension; j++ ) {
 					inTSP >> distMatrix[i][j];
@@ -117,7 +114,7 @@ void Data::readData(){
 			}
 
 			for ( int i = 0; i < dimension; i++ ) {
-				//                distMatrix[i][i] = 0;
+				// distMatrix[i][i] = 0;
 				distMatrix[i][i] = INFINITE;
 			}
 		}
@@ -128,7 +125,6 @@ void Data::readData(){
 				inTSP >> file;
 			}
 
-			// Preencher Matriz Distancia
 			for ( int i = 1; i < dimension; i++ ) {
 				for ( int j = 0; j < i; j++ ) {
 					inTSP >> distMatrix[i][j];
@@ -137,7 +133,7 @@ void Data::readData(){
 			}
 
 			for ( int i = 0; i < dimension; i++ ) {
-				//                distMatrix[i][i] = 0;
+				// distMatrix[i][i] = 0;
 				distMatrix[i][i] = INFINITE;
 			}
 		}
@@ -195,7 +191,7 @@ void Data::readData(){
 			}
 
 			for ( int i = 0; i < dimension; i++ ) {
-				//                distMatrix[i][i] = 0;
+				// distMatrix[i][i] = 0;
 				distMatrix[i][i] = INFINITE;
 			}
 
@@ -216,7 +212,7 @@ void Data::readData(){
 			}
 
 			for ( int i = 0; i < dimension; i++ ) {
-				//                distMatrix[i][i] = 0;
+				// distMatrix[i][i] = 0;
 				distMatrix[i][i] = INFINITE;
 			}
 
@@ -228,7 +224,6 @@ void Data::readData(){
 				inTSP >> file;
 			}
 
-			// Preencher Matriz Distancia
 			for ( int j = 0; j < dimension; j++ ) {
 				for ( int i = 0; i <= j; i++ ) {
 					inTSP >> distMatrix[i][j];
@@ -259,7 +254,7 @@ void Data::readData(){
 			}
 		}
 
-		//      cout << ewf << endl;
+		// cout << ewf << endl;
 	}
 
 	else if ( typeProblem == "EUC_2D" ) {
@@ -269,13 +264,12 @@ void Data::readData(){
 		while ( file.compare("NODE_COORD_SECTION") != 0 ) {
 			inTSP >> file;
 		}
-		// ler coordenadas
+
 		int tempCity;
 		for ( int i = 0; i < dimension; i++ ) {
 			inTSP >> tempCity >> xCoord[i] >> yCoord[i];
 		}
 
-		// Calcular Matriz Distancia (Euclidiana)
 		for ( int i = 0; i < dimension; i++ ) {
 			for ( int j = 0; j < dimension; j++ ) {
 				distMatrix[i][j] = floor ( CalcDistEuc ( xCoord, yCoord, i, j ) + 0.5 );
@@ -308,13 +302,12 @@ void Data::readData(){
 		while ( file.compare("NODE_COORD_SECTION") != 0 ) {
 			inTSP >> file;
 		}
-		// ler coordenadas
+
 		int tempCity;
 		for ( int i = 0; i < dimension; i++ ) {
 			inTSP >> tempCity >> xCoord[i] >> yCoord[i];
 		}
 
-		// Calcular Matriz Distancia (Euclidiana)
 		for ( int i = 0; i < dimension; i++ ) {
 			for ( int j = 0; j < dimension; j++ ) {
 				distMatrix[i][j] = ceil ( CalcDistEuc ( xCoord, yCoord, i, j ) );
@@ -330,11 +323,11 @@ void Data::readData(){
 
 		explicitCoord = true;
 
-		while ( file.compare("NODE_COORD_SECTION") != 0 ) { //enquanto nao achar o string "NODE_COORD_SECTION" faça
+		while ( file.compare("NODE_COORD_SECTION") != 0 ) {
 			inTSP >> file;
 		}
-		// ler coordenadas
-		int tempCity; //numero da cidade
+
+		int tempCity;
 		for ( int i = 0; i < dimension; i++ ) {
 			inTSP >> tempCity >> xCoord[i] >> yCoord[i];
 		}
@@ -379,7 +372,6 @@ void Data::readData(){
 			yCoord[i]=tempY[i];
 		}
 
-		// Calcular Matriz Distancia (Pesudo-Euclidiana)
 		for ( int i = 0; i < dimension; i++ ) {
 			for ( int j = 0; j < dimension; j++ ) {
 				distMatrix[i][j] = CalcDistAtt ( xCoord, yCoord, i, j );
@@ -407,13 +399,11 @@ void Data::readData(){
 }
 
 double Data::CalcDistEuc ( double *X, double *Y, int I, int J ){
-	return
-			sqrt ( pow ( X[I] - X[J], 2 ) + pow ( Y[I] - Y[J], 2 ) );
+	return sqrt ( pow ( X[I] - X[J], 2 ) + pow ( Y[I] - Y[J], 2 ) );
 }
 
 double Data::CalcDistAtt ( double *X, double *Y, int I, int J )
 {
-	// Calcula Pseudo Distancia Euclidiana
 	double rij, tij, dij;
 
 	rij = sqrt ( ( pow ( X[I] - X[J], 2 ) + pow ( Y[I] - Y[J], 2 ) ) / 10 );
@@ -453,8 +443,7 @@ double Data::CalcDistGeo ( double *latit, double *longit, int I, int J )
 	q2 = cos( latit[I] - latit[J] );
 	q3 = cos( latit[I] + latit[J] );
 
-	return
-			(int) ( RRR * acos( 0.5*((1.0+q1)*q2 - (1.0-q1)*q3) ) + 1.0);
+	return (int) ( RRR * acos( 0.5*((1.0+q1)*q2 - (1.0-q1)*q3) ) + 1.0);
 }
 
 
