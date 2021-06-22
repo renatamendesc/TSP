@@ -11,7 +11,7 @@ For instances which the number of vertices that we need to cover is very big, it
 * **Results:** Once implemented correctly, the algorithm finds optimal solutions to instances with up to 300 customers most of the times it's executed. All the execution results were registered on the folder [benchmark](https://github.com/renatamendesc/TSP/blob/main/GILS-RVND/benchmark/bm_final.txt).
 
 ### 2. Branch and Bound:
-**Branch and Bound** consists in an algorithm capable of solving optimization problems in an **exact method**. In this case, we consider a TSP version less restricted, which by a metaheuristc (it was used the **Hungarian Algoritm**) previously implemented, creates unfeasable solutions. By that results, we build a tree with solutions, and gradually we add constraints until we get feasible results. Once we search the entire tree, we can finally find the optimal solution.
+**Branch and Bound** consists on an algorithm capable of solving optimization problems in an **exact method**. In this case, we consider a TSP version less restricted, which by a metaheuristc (it was used the **Hungarian Algoritm**) previously implemented, creates unfeasable solutions. By that results, we build a tree with solutions, and gradually we add constraints until we get feasible results. Once we search the entire tree, we can finally find the optimal solution.
 
 * **Results:** Branch and Bound is an incredibly inefficient method. This happens because to find the optimal solution for the problem, we need to search the entire tree that was built, which usually gets very extense, making it impossible for the computer to find the optimal value in a good execution time for bigger instances.
 
