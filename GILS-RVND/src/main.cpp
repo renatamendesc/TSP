@@ -548,7 +548,6 @@ double search(int iIls, int dimension){
   }
 
   return finalCost;
-  
 }
 
 int main(int argc, char** argv) {
