@@ -1,17 +1,17 @@
 # Traveling Salesman Problem (TSP)
-O Traveling Salesman Problem (TSP), também conhecido como Problema do Caixeiro Viajante, se trata de um clássiso problema de otimização combinatória existente na literatura. Esse problema consiste em determinar a menor rota possível para percorrer uma série de cidades, visitando cada uma delas uma única vez, e por fim, retornando à cidade de inicial.
+The Traveling Salesman Problem (TSP) it's a traditional optimization problem in the literature. The problem consists of telling the shortest possible route to visit a series of cities exactly once and then returns to the original city. 
 
-Sendo assim, este repósitório contém diferentes formas de resolução para o TSP.
+That being so, this repository contains different approaches to solve TSP.
 
-## Abordagens de resolução
+## Different approaches
 
-### 1. Meta-Heurística:
-Para casos onde o número de destinos que se deseja percorrer é muito grande, faz-se necessário o uso de uma meta-heurística para resolver a situação, que não garante a solução ótima, porém, no geral, retorna soluções satisfatórias. Caso contrário, o computador não é capaz de determinar a melhor solução em um tempo viável. Dessa maneira, na resolução de forma meta-heurística, foi utilizado a **GILS-RVND**, que une componentes das heurísticas GRASP (Greedy Randomized Adaptive Search Procedure), ILS (Iterated Local Search) e RVND (Randomized Variable Neighborhood Descent).
+### 1. Metaheuristics:
+For instances which the number of vertices that we need to cover is very big, it's necessary the use of a metaheuristic to solve the issue, which doesn't guarantee the optimal solution, but in general results on good anwsers, otherwise, the computer can't give the optimal solution in a feasible time. Therefore, it was used the metaheuristic GILS-RVND, which combines components of Greedy Randomized Adaptive Search Procedure (GRASP), Iterated Local Search (ILS) and Variable Neighborhood Descent with Random neighborhood ordering (RVND).
 
-* **Resultados:** Uma vez implementado corretamente, o algoritmo é capaz de obter o valor ótimo para instâncias de até 300 cidades na maioria das vezes em que é executado. Todos os resultados da execução do programa foram registrados na pasta [benchmark](https://github.com/renatamendesc/TSP/blob/main/GILS-RVND/benchmark/bm_final.txt).
+* **Results:** Once implemented correctly, the algorithm finds optimal solutions to instances with up to 300 customers most of the times it's executed. All the execution results were registered on the folder [benchmark](https://github.com/renatamendesc/TSP/blob/main/GILS-RVND/benchmark/bm_final.txt).
 
 ### 2. Branch and Bound:
-O **Branch and Bound** consiste em um algoritmo capaz de resolver problemas combinatórios de **maneira exata**. Nesse caso, considera-se uma versão menos restrita do TSP, onde a partir de uma meta-heurística (nesse caso, foi utilizado o **Algoritmo Húngaro**) já previamente implementada, geramos soluções inviáveis. A partir desses resultados, construimos uma árvore de soluções e gradativamente adicionamos restrições, até obtermos soluções viáveis. Uma vez tendo analisado toda a árvore, conseguimos encontrar a solução ótima.
+**Branch and Bound** consists in an algorithm capable of solving optimization problems in an **exact method**. In this case, we consider a TSP version less restricted, which by a metaheuristc (it was used the **Hungarian Algoritm**) previously implemented, creates unfeasable solutions. By that results, we build a tree with solutions, and gradually we add constraints until we get feasible results. Once we search the entire tree, we can finally find the optimal solution.
 
-* **Resultados:** O Branch and Bound é considerado um método de resolução extremamente ineficaz e custoso. Isso ocorre porque para acharmos o melhor resultado para o problema, é preciso varrer toda a árvore que foi gerada, que costuma ficar muito extensa, impossibilitando o computador de retornar o valor ótimo em um tempo de execução razoável, quando se trata de instâncias maiores.
+* **Results:** Branch and Bound is an incredibly inefficient method. This happens because to find the optimal solution for the problem, we need to search the entire tree that was built, which usually gets very extense, making it impossible for the computer to find the optimal value in a good execution time for bigger instances.
 
