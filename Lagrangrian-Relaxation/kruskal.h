@@ -9,9 +9,9 @@
 
 using namespace std;
 
-typedef pair<int, int> ii;
-typedef vector <vector<double> >vvi;
-typedef vector<ii> vii;
+typedef pair <int, int> ii;
+typedef vector <vector <double>> vvi;
+typedef vector <ii> vii;
 
 class Kruskal{
 	
@@ -21,9 +21,8 @@ class Kruskal{
 		double MST(int nodes);
 		vii getEdges();
 
-
 	private:
-		priority_queue <pair<double,ii> > graph;
+		priority_queue <pair <double, ii>> graph;
 		vector <int> pset;
 		vii edges;
 
