@@ -19,6 +19,7 @@ class Kruskal{
 		Kruskal(vvi dist);
 
 		double MST(int nodes);
+		vii get1Tree();
 		vii getEdges();
 
 	private:

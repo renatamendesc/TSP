@@ -4,7 +4,7 @@
 Kruskal::Kruskal(vvi dist){
 	for(int i = 0; i < dist.size(); ++i){
 		for(int j = 0; j < dist[i].size(); ++j){
-			graph.push( make_pair(-dist[i][j], make_pair(i, j)) );
+			graph.push(make_pair(-dist[i][j], make_pair(i, j)));
 		}	
 	}
 }
@@ -40,7 +40,7 @@ double Kruskal::MST(int nodes){
 	double cost = 0;
 
 	while(!graph.empty()){
-		pair<double, ii> p = graph.top();
+		pair <double, ii> p = graph.top();
 		graph.pop();
 
 		if(!isSameSet(p.second.first, p.second.second)){
@@ -51,4 +51,8 @@ double Kruskal::MST(int nodes){
 	}
 
 	return cost;
+}
+
+vii get1Tree(){
+
 }
