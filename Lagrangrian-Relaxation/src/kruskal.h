@@ -18,8 +18,8 @@ class Kruskal{
 	public:
 		Kruskal(vvi dist);
 
-		double MST(int nodes);
-		vii get1Tree();
+		void MST(int nodes);
+		vii get1Tree(vvi dist);
 		vii getEdges();
 
 	private:

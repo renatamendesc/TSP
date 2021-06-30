@@ -2,11 +2,13 @@
 
 // Creates graph
 Kruskal::Kruskal(vvi dist){
+
 	for(int i = 0; i < dist.size(); ++i){
 		for(int j = 0; j < dist[i].size(); ++j){
 			graph.push(make_pair(-dist[i][j], make_pair(i, j)));
 		}	
 	}
+
 }
 
 void Kruskal::initDisjoint(int n){
@@ -34,7 +36,7 @@ vii Kruskal::getEdges(){
 	return edges;
 }
 
-double Kruskal::MST(int nodes){
+void Kruskal::MST(int nodes){
 	initDisjoint(nodes);
 
 	double cost = 0;
@@ -49,10 +51,27 @@ double Kruskal::MST(int nodes){
 			unionSet(p.second.first, p.second.second);
 		}
 	}
-
-	return cost;
 }
 
-vii get1Tree(){
+vii Kruskal::get1Tree(vvi dist){
 
+	ii firstEdge, secondEdge;
+
+	for(int i = 0; i < edges.size(); i++){
+		edges[i].first = edges[i].first + 2;
+		edges[i].second = edges[i].second + 2;
+	}
+
+	// Creates new edges
+	firstEdge.first = 1;
+	firstEdge.second = edges[0].second;
+
+	secondEdge.first = edges[0].first;
+	secondEdge.second = 1;
+
+	// Adds edges
+	edges.push_back(firstEdge);
+	edges.push_back(secondEdge);
+
+	return edges;
 }

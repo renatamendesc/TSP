@@ -25,15 +25,13 @@ int main(int argc, char** argv) {
 	}
 
 	Kruskal kruskal(incompleteDistance);
-	double cost = kruskal.MST(dimension-1);
+	kruskal.MST(dimension-1);
 
-	spanningTree = kruskal.getEdges();
+	spanningTree = kruskal.get1Tree(distance);
 
 	for(int i = 0; i < spanningTree.size(); i++){
 		cout << spanningTree[i].first << " - " << spanningTree[i].second << endl;
 	}
-
-	cout << endl << cost << endl;
 
 	delete data;
 
