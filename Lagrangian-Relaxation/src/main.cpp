@@ -5,6 +5,19 @@
 
 using namespace std;
 
+int getDegree (vector <pair <int, int>> &edges, int vertex) {
+
+	int degree = 0;
+
+	for(int j = 0; j < edges.size(); j++){
+		if(vertex == edges[j].first || vertex == edges[j].second){
+			degree++;
+		}
+	}
+
+	return degree;
+}
+
 void lagrangianCost (vector <pair <int, int>> &edges, int dimension) {
 
 	vector <int> subgradient;
@@ -12,15 +25,7 @@ void lagrangianCost (vector <pair <int, int>> &edges, int dimension) {
 	// Calculates subgradient vector
 	cout << "Subgradient: ";
 	for(int i = 0; i < dimension; i++){
-		int degreeNode = 0;
-
-		for(int j = 0; j < edges.size(); j++){
-			if(i+1 == edges[j].first || i+1 == edges[j].second){
-				degreeNode++;
-			}
-		}
-
-		subgradient.push_back(2-degreeNode);
+		subgradient.push_back(2 - getDegree(edges, i+1));
 		cout << subgradient[i] << " ";
 	}
 
