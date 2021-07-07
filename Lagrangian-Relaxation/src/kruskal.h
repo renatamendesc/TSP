@@ -19,13 +19,18 @@ class Kruskal{
 		Kruskal(vvi dist);
 
 		void MST(int nodes);
-		vii get1Tree(vvi dist);
+
+		double getCost();
+
+		void change1Tree(vvi dist);
 		vii getEdges();
 
 	private:
 		priority_queue <pair <double, ii>> graph;
 		vector <int> pset;
 		vii edges;
+
+		double cost = 0;
 
 		void initDisjoint(int n);
 		int findSet(int i);

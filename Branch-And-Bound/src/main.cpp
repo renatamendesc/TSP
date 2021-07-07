@@ -71,7 +71,7 @@ void search(string type, double ** originalMatrix, int dimension){
 		if(!node.getUpperBound()){
 
 			// Covers illegal arcs
-			for(int j = 0; j < node.getChoosenSubtour().size()-1; j++){
+			for(int j = 0; j < node.getChosenSubtour().size()-1; j++){
 
 				Node newNode;
 				newNode.setProhibitedArcs(node.getProhibitedArcs()); // New node inherits illegal arcs
@@ -79,8 +79,8 @@ void search(string type, double ** originalMatrix, int dimension){
 				// Defines new illegal arc
 				pair <int, int> arc;
 
-				arc.first = node.getChoosenSubtour()[j];
-				arc.second = node.getChoosenSubtour()[j+1];
+				arc.first = node.getChosenSubtour()[j];
+				arc.second = node.getChosenSubtour()[j+1];
 
 				// Adds new illegal arc
 				newNode.setProhibitedArc(arc);

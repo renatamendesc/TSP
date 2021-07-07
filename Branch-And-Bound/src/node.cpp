@@ -74,7 +74,7 @@ void Node::calculateSolution(hungarian_problem_t *p, int dimension){
 	for(int i = 0; i < this->subtours.size(); i++){
 		if(this->subtours[i].size() < smallerSubtour){
 			smallerSubtour = this->subtours[i].size();
-			this->choosen = i;
+			this->chosen = i;
 		}
 	}
 }
@@ -105,8 +105,8 @@ double Node::getLowerBound(){
     return this->lowerBound;
 }
 
-vector <int> Node::getChoosenSubtour(){
-    return this->subtours[this->choosen];
+vector <int> Node::getChosenSubtour(){
+    return this->subtours[this->chosen];
 }
 
 vector <pair <int, int>> Node::getProhibitedArcs(){

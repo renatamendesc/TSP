@@ -39,8 +39,6 @@ vii Kruskal::getEdges(){
 void Kruskal::MST(int nodes){
 	initDisjoint(nodes);
 
-	double cost = 0;
-
 	while(!graph.empty()){
 		pair <double, ii> p = graph.top();
 		graph.pop();
@@ -51,9 +49,14 @@ void Kruskal::MST(int nodes){
 			unionSet(p.second.first, p.second.second);
 		}
 	}
+
 }
 
-vii Kruskal::get1Tree(vvi dist){
+double Kruskal::getCost() {
+	return cost;
+}
+
+void Kruskal::change1Tree(vvi dist){
 
 	ii firstEdge, secondEdge;
 
@@ -69,9 +72,10 @@ vii Kruskal::get1Tree(vvi dist){
 	secondEdge.first = edges[0].first;
 	secondEdge.second = 1;
 
+	cost += dist[0][edges[0].second-1] + dist[edges[0].first-1][0];
+
 	// Adds edges
 	edges.push_back(firstEdge);
 	edges.push_back(secondEdge);
 
-	return edges;
 }

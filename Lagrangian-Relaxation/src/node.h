@@ -2,7 +2,6 @@
 #define NODE_H
 
 #include "data.h"
-#include "hungarian.h"
 #include <iostream>
 #include <vector>
 #include <climits>
@@ -20,7 +19,6 @@ class Node {
 
     public:
         void prohibitArcs(int dimension, double ** newMatrix, double ** originalMatrix);
-        void calculateSolution(hungarian_problem_t *p, int dimension);
         void printSolution(double time);
 
         bool getUpperBound();
@@ -33,5 +31,6 @@ class Node {
         void setLowerBound(double lowerBound);
 
 };
+
 
 #endif
