@@ -16,13 +16,13 @@ typedef vector <ii> vii;
 class Kruskal{
 	
 	public:
-		Kruskal(vvi dist);
+		Kruskal(vector <vector <double>> &distance, int dimension);
 
 		void MST(int nodes);
 
 		double getCost();
 
-		void change1Tree(vvi dist);
+		void change1Tree(vvi originalDist);
 		vii getEdges();
 
 	private:

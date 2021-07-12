@@ -1,13 +1,24 @@
 #include "kruskal.h"
 
 // Creates graph
-Kruskal::Kruskal(vvi dist){
+Kruskal::Kruskal(vector <vector <double>> &distance, int dimension){
 
-	for(int i = 0; i < dist.size(); ++i){
-		for(int j = 0; j < dist[i].size(); ++j){
+	// Changes matrix with incomplete distance
+	vector <vector <double>> dist (dimension-1, vector <double> (dimension-1));
+
+	for (int i = 1; i < dimension; i++){
+		for (int j = 1; j < dimension; j++){
+			dist[i-1][j-1] = distance[i][j];
+		}
+	}
+
+	for(int i = 0; i < dimension-1; ++i){
+		for(int j = 0; j < dimension-1; ++j){
 			graph.push(make_pair(-dist[i][j], make_pair(i, j)));
 		}	
 	}
+
+	MST(dimension-1);
 
 }
 
@@ -50,13 +61,14 @@ void Kruskal::MST(int nodes){
 		}
 	}
 
+	// cout << cost << endl;
 }
 
 double Kruskal::getCost() {
 	return cost;
 }
 
-void Kruskal::change1Tree(vvi dist){
+void Kruskal::change1Tree(vvi originalDist){
 
 	ii firstEdge, secondEdge;
 
@@ -72,7 +84,7 @@ void Kruskal::change1Tree(vvi dist){
 	secondEdge.first = edges[0].first;
 	secondEdge.second = 1;
 
-	cost += dist[0][edges[0].second-1] + dist[edges[0].first-1][0];
+	cost += originalDist[0][edges[0].second-1] + originalDist[edges[0].first-1][0];
 
 	// Adds edges
 	edges.push_back(firstEdge);
