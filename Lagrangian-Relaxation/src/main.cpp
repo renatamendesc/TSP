@@ -52,6 +52,22 @@ vector <double> stepSize (double upperBound, double lowerBound, double epsilon, 
 
 }
 
+double primalBound (vector <vector <double>> &distance, int dimension) {
+
+	priority_queue <pair <double, pair <int, int>>> graph;
+	double cost = 0;
+
+	// Creates graph
+	for(int i = 0; i < dimension; ++i){
+		for(int j = 0; j < dimension; ++j){
+			graph.push(make_pair(-distance[i][j], make_pair(i, j)));
+		}	
+	}
+
+	return cost;
+
+}
+
 void lagrangianDual (vector <vector <double>> &distance, int dimension, Data *data) {
 
 	vector <pair <int, int>> spanningTree;
@@ -67,6 +83,8 @@ void lagrangianDual (vector <vector <double>> &distance, int dimension, Data *da
 
 	// cout << cost << endl;
 	double upperBound, epsilon;
+
+	epsilon = 1;
 
 	subgradient = stepDirection(spanningTree, dimension);
 	multipliers = stepSize(upperBound, cost, epsilon, subgradient, lastSubgradient);
