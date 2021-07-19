@@ -54,81 +54,47 @@ vector <double> stepSize (double upperBound, double lowerBound, double epsilon, 
 
 bool subtourSearch (vector <pair <int, int>> graph, int dimension) {
 
-	int start, next, depot, graphSize, counter = 0, index = 0;
+	pair <int, int> depot;
 
-	graphSize = graph.size();
+	while (!graph.empty()) {
 
-	start = graph[0].first;
-	next = graph[0].second;
+		depot.first = graph[0].first;
+		depot.second = graph[0].second;
 
-	depot = start;
+		// Searches graph
+		for (int i = 1; i < graph.size(); i++) {
 
-	for (int i = 0; i < graph.size(); i++) {
-		cout << graph[i].first << " - " << graph[i].second << endl;
-	}
+			// Verifies if its a cycle
+			if ((graph[i].first == depot.first && graph[i].second == depot.second) || (graph[i].second == depot.first && graph[i].first == depot.second)) {
+				return true; // Its a cycle
 
-	cout << endl;
+			} else {
 
-	while (true) {
+				if (graph[i].first == depot.first) {
+					depot.first = graph[i].second;
+					graph.erase(graph.begin() + i);
 
-		// Searches for path
-		for (int i = 0; i < graph.size(); i++) {
+				} else if (graph[i].second == depot.second) {
+					depot.second = graph[i].first;
+					graph.erase(graph.begin() + i);
 
-			if (i != index) {
+				} else if (graph[i].second == depot.first) {
+					depot.first = graph[i].first;
+					graph.erase(graph.begin() + i);
 
-				if (graph[i].first == next) {
-					start = graph[i].first;
-					next = graph[i].second;
+				} else if (graph[i].first == depot.second) {
+					depot.second = graph[i].second;
+					graph.erase(graph.begin() + i);
 
-					graph.erase(graph.begin() + index);
-					index = i-1;
-
-					counter++;
-					break;
-
-				} else if (graph[i].second == next) {
-					start = graph[i].second;
-					next = graph[i].first;
-
-					graph.erase(graph.begin() + index);
-					index = i-1;
-
-					counter++;
-					break;
-
-				}
-			}
-
-			// If all edges were searched
-			if (i == graph.size()-1) {
-
-				if (next == depot) { // It's a cycle
-					return true;
-
-				} else {
-
-					// If all the edges were found
-					if (counter == graphSize-1) {
-						return false;
-
-					} else { 
-						graph.erase(graph.begin() + index); // Starts searching another path
-
-						start = graph[0].first;
-						next = graph[0].second;
-
-						index = 0;
-						depot = start;
-
-						graphSize = graph.size();
-
-					}
 				}
 			}
 		}
 
-		// cout << "oi" << endl;
+		graph.erase(graph.begin());
+
 	}
+
+	return false;
 }
 
 double primalBound (vector <vector <double>> &distance, int dimension) {
@@ -153,8 +119,6 @@ double primalBound (vector <vector <double>> &distance, int dimension) {
 		edgesTest = edges;
 		edgesTest.push_back(edge.second);
 
-		// cout << edge.first << " - " << edge.second << endl;
-
 		if ((getDegree(edgesTest, edge.second.first) <= 2) && (getDegree(edgesTest, edge.second.second) <= 2)) { // Validates node degree
 
 			if (edges.size() != dimension - 1) {
@@ -169,31 +133,42 @@ double primalBound (vector <vector <double>> &distance, int dimension) {
 
 		}
 
-		// cout << "bom dia" << endl;
 	}
 
+	// cout << "Cost: " << cost << endl;
 	return cost;
 
 }
 
-void lagrangianDual (vector <vector <double>> &distance, int dimension, Data *data) {
+void updateLagrangianCost (vector <vector <double>> &distance, vector <double> &multipliers, int dimension) {
+
+	for (int i = 0; i < dimension; i++) {
+		for (int j = i+1; j < dimension; j++) {
+			distance[i][j] -= (multipliers[i] + multipliers[j]);
+			distance[j][i] -= (multipliers[i] + multipliers[j]);	
+		}
+	}
+}
+
+void lagrangianDual (vector <vector <double>> &originalDistance, int dimension, Data *data) {
 
 	vector <pair <int, int>> spanningTree;
 	vector <double> subgradient, multipliers, lastSubgradient (dimension);
 
+	vector <vector <double>> lagragianDistance = originalDistance;
+
 	// Generates first 1-tree
-	Kruskal kruskal(distance, dimension);
-	kruskal.change1Tree(distance);
+	Kruskal kruskal(lagragianDistance, dimension);
+	kruskal.change1Tree(lagragianDistance);
 
 	// Gets 1-tree edges and cost
 	spanningTree = kruskal.getEdges();
 	double cost = kruskal.getCost();
 
 	// cout << cost << endl;
-	double upperBound, epsilon;
 
-	epsilon = 1;
-	upperBound = primalBound(distance, dimension);
+	double epsilon = 1;
+	double upperBound = primalBound(lagragianDistance, dimension);
 
 	subgradient = stepDirection(spanningTree, dimension);
 	multipliers = stepSize(upperBound, cost, epsilon, subgradient, lastSubgradient);
@@ -207,6 +182,8 @@ void lagrangianDual (vector <vector <double>> &distance, int dimension, Data *da
 	for(int i = 0; i < dimension; i++){
 		cout << multipliers[i] << " ";
 	}
+
+	updateLagrangianCost(lagragianDistance, multipliers, dimension);
 
 }
 
