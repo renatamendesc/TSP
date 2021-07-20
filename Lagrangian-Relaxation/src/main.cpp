@@ -32,19 +32,19 @@ vector <double> stepDirection (vector <pair <int, int>> &edges, int dimension) {
 	return subgradient;
 }
 
-vector <double> stepSize (double upperBound, double lowerBound, double epsilon, vector <double> &subgradient, vector <double> &lastSubgradient) {
+vector <double> stepSize (double upperBound, double lowerBound, double epsilon, vector <double> &lastSubgradient, vector <pair <int, int>> &spanningTree, int dimension) {
 
-	int lenght = subgradient.size();
+	vector <double> subgradient = stepDirection(spanningTree, dimension);  
+	vector <double> multiplier (dimension);
 	double denominator = 0;
-	vector <double> multiplier (lenght);
 
-	for (int i = 0; i < lenght; i++) {
+	for (int i = 0; i < dimension; i++) {
 		denominator += subgradient[i] * subgradient[i];
 	}
 
 	double step = (epsilon * (upperBound - lowerBound)) / denominator;
 
-	for (int i  = 0; i < lenght; i++) {
+	for (int i  = 0; i < dimension; i++) {
 		multiplier[i] = lastSubgradient[i] + step * subgradient[i];
 	}
 
@@ -148,42 +148,56 @@ void updateLagrangianCost (vector <vector <double>> &distance, vector <double> &
 			distance[j][i] -= (multipliers[i] + multipliers[j]);	
 		}
 	}
+
 }
 
-void lagrangianDual (vector <vector <double>> &originalDistance, int dimension, Data *data) {
+void lagrangianDual (vector <vector <double>> &originalDistance, int dimension) {
 
-	vector <pair <int, int>> spanningTree;
-	vector <double> subgradient, multipliers, lastSubgradient (dimension);
-
+	vector <pair <int, int>> spanningTree, currentSolution;
 	vector <vector <double>> lagragianDistance = originalDistance;
+	vector <double> multipliers, bestMultipliers, lastMultipliers (dimension);
+	
+	double epsilon, upperBound, lowerBound, bestLowerBound = __DBL_MIN__;
 
-	// Generates first 1-tree
-	Kruskal kruskal(lagragianDistance, dimension);
-	kruskal.change1Tree(lagragianDistance);
+	if (dimension < 70) epsilon = 1;
+	else epsilon = 2;
 
-	// Gets 1-tree edges and cost
-	spanningTree = kruskal.getEdges();
-	double cost = kruskal.getCost();
+	while (true) {
 
-	// cout << cost << endl;
+		// Generates first 1-tree
+		Kruskal kruskal(lagragianDistance, dimension);
+		kruskal.change1Tree(lagragianDistance);
 
-	double epsilon = 1;
-	double upperBound = primalBound(lagragianDistance, dimension);
+		// Gets 1-tree edges and cost
+		spanningTree = kruskal.getEdges();
+		lowerBound = kruskal.getCost();
 
-	subgradient = stepDirection(spanningTree, dimension);
-	multipliers = stepSize(upperBound, cost, epsilon, subgradient, lastSubgradient);
+		if (lowerBound > bestLowerBound) {
+			bestLowerBound = lowerBound;
+			bestMultipliers = multipliers;
+			currentSolution = spanningTree;
+		}
 
-	for(int i = 0; i < dimension; i++){
-		cout << subgradient[i] << " ";
+		upperBound = primalBound(lagragianDistance, dimension);
+	
+		multipliers = stepSize(upperBound, lowerBound, epsilon, lastMultipliers, spanningTree, dimension);
+
+		
+
+		cout << endl;
+
+		for(int i = 0; i < dimension; i++){
+			cout << multipliers[i] << " ";
+		}
+
+		if (upperBound - lowerBound <= epsilon) break;
+
+		lagragianDistance = originalDistance;
+		updateLagrangianCost(lagragianDistance, multipliers, dimension);
+
+		break;
+
 	}
-
-	cout << endl;
-
-	for(int i = 0; i < dimension; i++){
-		cout << multipliers[i] << " ";
-	}
-
-	updateLagrangianCost(lagragianDistance, multipliers, dimension);
 
 }
 
@@ -195,17 +209,15 @@ int main (int argc, char** argv) {
 	int dimension = data->getDimension();
 
 	vector <vector <double>> distance (dimension, vector <double> (dimension));
-	// vector <vector <double>> originalDistance (dimension, vector <double> (dimension));
 
 	// Generates matrix with distances
 	for (int i = 0; i < dimension; i++) {
 		for (int j = 0; j < dimension; j++) {
 			distance[i][j] = data->getDistance(i, j);
-			// originalDistance[i][j] = data->getDistance(i, j);
 		}
 	}
 
-	lagrangianDual(distance, dimension, data);
+	lagrangianDual(distance, dimension);
 
 	delete data;
 
