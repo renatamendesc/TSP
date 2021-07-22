@@ -23,18 +23,17 @@ vector <double> stepDirection (vector <pair <int, int>> &edges, int dimension) {
 	vector <double> subgradient (dimension);
 
 	// Calculates subgradient vector
-	cout << "Subgradient: ";
+	// cout << "Subgradient: ";
 	for(int i = 0; i < dimension; i++){
 		subgradient[i] = 2 - getDegree(edges, i+1);
-		cout << subgradient[i] << " ";
+		// cout << subgradient[i] << " ";
 	}
 
 	return subgradient;
 }
 
-vector <double> stepSize (double upperBound, double lowerBound, double epsilon, vector <double> &lastSubgradient, vector <pair <int, int>> &spanningTree, int dimension) {
-
-	vector <double> subgradient = stepDirection(spanningTree, dimension);  
+vector <double> stepSize (double upperBound, double lowerBound, double epsilon, vector <double> &lastSubgradient, vector <double> &subgradient, int dimension) {
+ 
 	vector <double> multiplier (dimension);
 	double denominator = 0;
 
@@ -55,42 +54,96 @@ vector <double> stepSize (double upperBound, double lowerBound, double epsilon, 
 bool subtourSearch (vector <pair <int, int>> graph, int dimension) {
 
 	pair <int, int> depot;
+	bool previewIsEdge = true, isEdge = true;
 
 	while (!graph.empty()) {
+		
+		if (isEdge) {
 
-		depot.first = graph[0].first;
-		depot.second = graph[0].second;
+			depot.first = graph[0].first;
+			depot.second = graph[0].second;
 
-		// Searches graph
-		for (int i = 1; i < graph.size(); i++) {
-
-			// Verifies if its a cycle
-			if ((graph[i].first == depot.first && graph[i].second == depot.second) || (graph[i].second == depot.first && graph[i].first == depot.second)) {
-				return true; // Its a cycle
-
-			} else {
-
-				if (graph[i].first == depot.first) {
-					depot.first = graph[i].second;
-					graph.erase(graph.begin() + i);
-
-				} else if (graph[i].second == depot.second) {
-					depot.second = graph[i].first;
-					graph.erase(graph.begin() + i);
-
-				} else if (graph[i].second == depot.first) {
-					depot.first = graph[i].first;
-					graph.erase(graph.begin() + i);
-
-				} else if (graph[i].first == depot.second) {
-					depot.second = graph[i].second;
-					graph.erase(graph.begin() + i);
-
-				}
-			}
 		}
 
-		graph.erase(graph.begin());
+		// Searches graph
+		for (int i = 0; i < graph.size(); i++){
+
+			if (i != 0 || !isEdge) {
+
+				// Verifies if its a cycle
+				if ((graph[i].first == depot.first && graph[i].second == depot.second) || (graph[i].second == depot.first && graph[i].first == depot.second)) {
+					return true; // Its a cycle
+
+				} else {
+
+					if (graph[i].first == depot.first) {
+						depot.first = graph[i].second;
+						graph.erase(graph.begin() + i);
+
+						if (isEdge) {
+							previewIsEdge = true;
+
+						} else {
+							previewIsEdge = false;
+
+						}
+
+						isEdge = false;
+						break;
+
+					} else if (graph[i].second == depot.second) {
+						depot.second = graph[i].first;
+						graph.erase(graph.begin() + i);
+
+						if (isEdge) {
+							previewIsEdge = true;
+
+						} else {
+							previewIsEdge = false;
+
+						}
+
+						isEdge = false;
+						break;
+
+					} else if (graph[i].second == depot.first) {
+						depot.first = graph[i].first;
+						graph.erase(graph.begin() + i);
+
+						if (isEdge) {
+							previewIsEdge = true;
+
+						} else {
+							previewIsEdge = false;
+
+						}
+
+						isEdge = false;
+						break;
+
+					} else if (graph[i].first == depot.second) {
+						depot.second = graph[i].second;
+						graph.erase(graph.begin() + i);
+
+						if (isEdge) {
+							previewIsEdge = true;
+
+						} else {
+							previewIsEdge = false;
+
+						}
+
+						isEdge = false;
+						break;
+					}
+				}
+			}
+
+			if (i == graph.size()-1) isEdge == true;
+
+		}
+
+		if (previewIsEdge) graph.erase(graph.begin());
 
 	}
 
@@ -135,7 +188,10 @@ double primalBound (vector <vector <double>> &distance, int dimension) {
 
 	}
 
-	// cout << "Cost: " << cost << endl;
+	for (int i = 0; i < edges.size(); i++ ) {
+		cout << edges[i].first << " - " << edges[i].second << endl;
+	}
+
 	return cost;
 
 }
@@ -151,16 +207,28 @@ void updateLagrangianCost (vector <vector <double>> &distance, vector <double> &
 
 }
 
+bool validateSubgradient (vector <int> &subgradient) {
+
+	for (int i  = 0; i < subgradient.size(); i++) {
+		if (subgradient[i] != 0) return true;
+	}
+
+	return false;
+
+}
+
 void lagrangianDual (vector <vector <double>> &originalDistance, int dimension) {
 
 	vector <pair <int, int>> spanningTree, currentSolution;
 	vector <vector <double>> lagragianDistance = originalDistance;
-	vector <double> multipliers, bestMultipliers, lastMultipliers (dimension);
+	vector <double> subgradient, multipliers, bestMultipliers, lastMultipliers (dimension);
 	
 	double epsilon, upperBound, lowerBound, bestLowerBound = __DBL_MIN__;
 
 	if (dimension < 70) epsilon = 1;
 	else epsilon = 2;
+
+	int iter = 0;
 
 	while (true) {
 
@@ -176,26 +244,53 @@ void lagrangianDual (vector <vector <double>> &originalDistance, int dimension) 
 			bestLowerBound = lowerBound;
 			bestMultipliers = multipliers;
 			currentSolution = spanningTree;
+
+			iter = 0;
+
+		} else {
+			iter++;
+
+			if (iter > 30) {
+
+				epsilon = epsilon / 2;
+				if (epsilon < 0.0005) break;
+
+			}
 		}
 
 		upperBound = primalBound(lagragianDistance, dimension);
-	
-		multipliers = stepSize(upperBound, lowerBound, epsilon, lastMultipliers, spanningTree, dimension);
+		if (upperBound - lowerBound <= epsilon) break;
 
+		subgradient = stepDirection(spanningTree, dimension);
+
+		if (!validateSubgradient) {
+			bestLowerBound = lowerBound;
+			bestMultipliers = multipliers;
+			currentSolution = spanningTree;
+
+			break;
+		}
+
+		lastMultipliers = multipliers;
+		multipliers = stepSize(upperBound, lowerBound, epsilon, lastMultipliers, subgradient, dimension);
+
+		/*
 		cout << endl;
 
 		for(int i = 0; i < dimension; i++){
 			cout << multipliers[i] << " ";
 		}
-
-		if (upperBound - lowerBound <= epsilon) break;
+		*/
 
 		lagragianDistance = originalDistance;
 		updateLagrangianCost(lagragianDistance, multipliers, dimension);
 
-		break;
+		cout << endl << "Upper Bound: " << upperBound << endl;
+		cout << "Lower Bound: " << bestLowerBound << endl;
 
 	}
+
+	cout << endl;
 
 }
 
