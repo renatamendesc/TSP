@@ -182,8 +182,6 @@ void lagrangianDual (vector <vector <double>> &originalDistance, int dimension) 
 	
 		multipliers = stepSize(upperBound, lowerBound, epsilon, lastMultipliers, spanningTree, dimension);
 
-		
-
 		cout << endl;
 
 		for(int i = 0; i < dimension; i++){
