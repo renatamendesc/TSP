@@ -54,97 +54,59 @@ vector <double> stepSize (double upperBound, double lowerBound, double epsilon, 
 bool subtourSearch (vector <pair <int, int>> graph, int dimension) {
 
 	pair <int, int> depot;
-	bool previewIsEdge = true, isEdge = true;
+	bool changeDepot = false;
 
 	while (!graph.empty()) {
-		
-		if (isEdge) {
+
+		if (!changeDepot) {
 
 			depot.first = graph[0].first;
 			depot.second = graph[0].second;
 
+			graph.erase(graph.begin());
+
 		}
 
-		// Searches graph
-		for (int i = 0; i < graph.size(); i++){
+		changeDepot = false;
 
-			if (i != 0 || !isEdge) {
+		for (int i = 0; i < graph.size(); i++) {
 
-				// Verifies if its a cycle
-				if ((graph[i].first == depot.first && graph[i].second == depot.second) || (graph[i].second == depot.first && graph[i].first == depot.second)) {
-					return true; // Its a cycle
+			if ((graph[i].first == depot.first && graph[i].second == depot.second) || (graph[i].second == depot.first && graph[i].first == depot.second)) {
+				
+				return true;
 
-				} else {
+			} else {
 
-					if (graph[i].first == depot.first) {
-						depot.first = graph[i].second;
-						graph.erase(graph.begin() + i);
+				if (depot.first == graph[i].first) {
 
-						if (isEdge) {
-							previewIsEdge = true;
+					depot.first = graph[i].second;
+					changeDepot = true;	
 
-						} else {
-							previewIsEdge = false;
+				} else if (depot.first == graph[i].second) {
 
-						}
+					depot.first = graph[i].first;
+					changeDepot = true;	
 
-						isEdge = false;
-						break;
+				} else if (depot.second == graph[i].first) {
 
-					} else if (graph[i].second == depot.second) {
-						depot.second = graph[i].first;
-						graph.erase(graph.begin() + i);
+					depot.second = graph[i].second;
+					changeDepot = true;	
 
-						if (isEdge) {
-							previewIsEdge = true;
+				} else if (depot.second == graph[i].second) {
 
-						} else {
-							previewIsEdge = false;
+					depot.second = graph[i].first;
+					changeDepot = true;	
 
-						}
+				}
 
-						isEdge = false;
-						break;
+				if (changeDepot) {
 
-					} else if (graph[i].second == depot.first) {
-						depot.first = graph[i].first;
-						graph.erase(graph.begin() + i);
+					graph.erase(graph.begin() + i);
+					break;
 
-						if (isEdge) {
-							previewIsEdge = true;
-
-						} else {
-							previewIsEdge = false;
-
-						}
-
-						isEdge = false;
-						break;
-
-					} else if (graph[i].first == depot.second) {
-						depot.second = graph[i].second;
-						graph.erase(graph.begin() + i);
-
-						if (isEdge) {
-							previewIsEdge = true;
-
-						} else {
-							previewIsEdge = false;
-
-						}
-
-						isEdge = false;
-						break;
-					}
 				}
 			}
-
-			if (i == graph.size()-1) isEdge == true;
-
 		}
-
-		if (previewIsEdge) graph.erase(graph.begin());
-
 	}
 
 	return false;
