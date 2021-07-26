@@ -1,258 +1,65 @@
 #include "data.h"
 #include "kruskal.h"
+#include "dual.h"
+#include "node.h"
+
 #include <iostream>
 #include <vector>
 
 using namespace std;
 
-int getDegree (vector <pair <int, int>> &edges, int vertex) {
+void search (vector <vector <double>> &distance, int dimension) {
 
-	int degree = 0;
+	clock_t start = clock(); // Starts time counting
 
-	for(int j = 0; j < edges.size(); j++){
-		if(vertex == edges[j].first || vertex == edges[j].second){
-			degree++;
-		}
+	Node root;
+	Dual lagrangian;
+
+	root = lagrangian.lagrangianDual(root, distance, dimension);
+	root.verifiesNode (dimension);
+
+	vector <Node> tree;
+	tree.push_back(root);
+
+	for (int i = 0; i < root.getGraph().size(); i++) {
+		cout << root.getGraph()[i].first << " - " << root.getGraph()[i].second << endl;
 	}
 
-	return degree;
-}
+	cout << endl << "Illegal edges: ";
 
-vector <double> stepDirection (vector <pair <int, int>> &edges, int dimension) {
-
-	vector <double> subgradient (dimension);
-
-	// Calculates subgradient vector
-	// cout << "Subgradient: ";
-	for(int i = 0; i < dimension; i++){
-		subgradient[i] = 2 - getDegree(edges, i+1);
-		// cout << subgradient[i] << " ";
+	for (int i = 0; i < root.getIllegalEdges().size(); i++) {
+		cout << root.getIllegalEdges()[i] << " ";
 	}
 
-	return subgradient;
-}
-
-vector <double> stepSize (double upperBound, double lowerBound, double epsilon, vector <double> &lastSubgradient, vector <double> &subgradient, int dimension) {
- 
-	vector <double> multiplier (dimension);
-	double denominator = 0;
-
-	for (int i = 0; i < dimension; i++) {
-		denominator += subgradient[i] * subgradient[i];
-	}
-
-	double step = (epsilon * (upperBound - lowerBound)) / denominator;
-
-	for (int i  = 0; i < dimension; i++) {
-		multiplier[i] = lastSubgradient[i] + step * subgradient[i];
-	}
-
-	return multiplier;
-
-}
-
-bool subtourSearch (vector <pair <int, int>> graph, int dimension) {
-
-	pair <int, int> depot;
-	bool changeDepot = false;
-
-	while (!graph.empty()) {
-
-		if (!changeDepot) {
-
-			depot.first = graph[0].first;
-			depot.second = graph[0].second;
-
-			graph.erase(graph.begin());
-
-		}
-
-		changeDepot = false;
-
-		for (int i = 0; i < graph.size(); i++) {
-
-			if ((graph[i].first == depot.first && graph[i].second == depot.second) || (graph[i].second == depot.first && graph[i].first == depot.second)) {
-				
-				return true;
-
-			} else {
-
-				if (depot.first == graph[i].first) {
-
-					depot.first = graph[i].second;
-					changeDepot = true;	
-
-				} else if (depot.first == graph[i].second) {
-
-					depot.first = graph[i].first;
-					changeDepot = true;	
-
-				} else if (depot.second == graph[i].first) {
-
-					depot.second = graph[i].second;
-					changeDepot = true;	
-
-				} else if (depot.second == graph[i].second) {
-
-					depot.second = graph[i].first;
-					changeDepot = true;	
-
-				}
-
-				if (changeDepot) {
-
-					graph.erase(graph.begin() + i);
-					break;
-
-				}
-			}
-		}
-	}
-
-	return false;
-}
-
-double primalBound (vector <vector <double>> &distance, int dimension) {
-
-	priority_queue <pair <double, pair <int, int>>> graph;
-	double cost = 0;
-
-	// Creates graph
-	for (int i = 0; i < dimension; ++i) {
-		for (int j = 0; j < dimension; ++j) {
-			graph.push(make_pair(-distance[i][j], make_pair(i, j)));
-		}	
-	}
-
-	vector <pair <int, int>> edges, edgesTest;
-
-	while (edges.size() < dimension) {
-
-		pair <double, pair <int, int>> edge = graph.top();
-		graph.pop();
-
-		edgesTest = edges;
-		edgesTest.push_back(edge.second);
-
-		if ((getDegree(edgesTest, edge.second.first) <= 2) && (getDegree(edgesTest, edge.second.second) <= 2)) { // Validates node degree
-
-			if (edges.size() != dimension - 1) {
-
-				if (subtourSearch(edgesTest, dimension)) continue; // Validates subtours
-				
-			}
-
-			// Adds edge if not illegal
-			edges = edgesTest;
-			cost += -edge.first;
-
-		}
-
-	}
-
-	for (int i = 0; i < edges.size(); i++ ) {
-		cout << edges[i].first << " - " << edges[i].second << endl;
-	}
-
-	return cost;
-
-}
-
-void updateLagrangianCost (vector <vector <double>> &distance, vector <double> &multipliers, int dimension) {
-
-	for (int i = 0; i < dimension; i++) {
-		for (int j = i+1; j < dimension; j++) {
-			distance[i][j] -= (multipliers[i] + multipliers[j]);
-			distance[j][i] -= (multipliers[i] + multipliers[j]);	
-		}
-	}
-
-}
-
-bool validateSubgradient (vector <int> &subgradient) {
-
-	for (int i  = 0; i < subgradient.size(); i++) {
-		if (subgradient[i] != 0) return true;
-	}
-
-	return false;
-
-}
-
-void lagrangianDual (vector <vector <double>> &originalDistance, int dimension) {
-
-	vector <pair <int, int>> spanningTree, currentSolution;
-	vector <vector <double>> lagragianDistance = originalDistance;
-	vector <double> subgradient, multipliers, bestMultipliers, lastMultipliers (dimension);
+	cout << endl << "Lower Bound: " << root.getLowerBound() << endl;
 	
-	double epsilon, upperBound, lowerBound, bestLowerBound = __DBL_MIN__;
 
-	if (dimension < 70) epsilon = 1;
-	else epsilon = 2;
+	while (!tree.empty()) {
 
-	int iter = 0;
+		// Depth search
+		Node node = tree.back();
+		tree.erase(tree.end());
 
-	while (true) {
+		if (!node.getUpperBound()) {
 
-		// Generates first 1-tree
-		Kruskal kruskal(lagragianDistance, dimension);
-		kruskal.change1Tree(lagragianDistance);
-
-		// Gets 1-tree edges and cost
-		spanningTree = kruskal.getEdges();
-		lowerBound = kruskal.getCost();
-
-		if (lowerBound > bestLowerBound) {
-			bestLowerBound = lowerBound;
-			bestMultipliers = multipliers;
-			currentSolution = spanningTree;
-
-			iter = 0;
+			cout << "LOWER BOUND" << endl;
 
 		} else {
-			iter++;
 
-			if (iter > 30) {
+			cout << "UPPER BOUND" << endl;
 
-				epsilon = epsilon / 2;
-				if (epsilon < 0.0005) break;
-
-			}
 		}
 
-		upperBound = primalBound(lagragianDistance, dimension);
-		if (upperBound - lowerBound <= epsilon) break;
-
-		subgradient = stepDirection(spanningTree, dimension);
-
-		if (!validateSubgradient) {
-			bestLowerBound = lowerBound;
-			bestMultipliers = multipliers;
-			currentSolution = spanningTree;
-
-			break;
-		}
-
-		lastMultipliers = multipliers;
-		multipliers = stepSize(upperBound, lowerBound, epsilon, lastMultipliers, subgradient, dimension);
-
-		/*
-		cout << endl;
-
-		for(int i = 0; i < dimension; i++){
-			cout << multipliers[i] << " ";
-		}
-		*/
-
-		lagragianDistance = originalDistance;
-		updateLagrangianCost(lagragianDistance, multipliers, dimension);
-
-		cout << endl << "Upper Bound: " << upperBound << endl;
-		cout << "Lower Bound: " << bestLowerBound << endl;
+		break;
 
 	}
+	
+	clock_t fim = clock();
+	double time = ((double) (fim - start)) / CLOCKS_PER_SEC;
 
-	cout << endl;
+	cout << "Time: " << time << endl;
+
+	// if (time > 600) break;
 
 }
 
@@ -272,7 +79,7 @@ int main (int argc, char** argv) {
 		}
 	}
 
-	lagrangianDual(distance, dimension);
+	search(distance, dimension);
 
 	delete data;
 

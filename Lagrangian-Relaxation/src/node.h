@@ -2,35 +2,51 @@
 #define NODE_H
 
 #include "data.h"
+
 #include <iostream>
 #include <vector>
 #include <climits>
+
 using namespace std;
 
 class Node {
 
     private:
-        vector <pair <int, int>> illegalArcs; // Vector with illegal arcs
-        vector <vector <int>> subtours; // Vector with subtours
+        vector <int> illegalEdges; // Vector with illegal arcs
+        vector <pair <int, int>> graph;
 
+        vector <double> multipliers;
+
+        int choosenVertex;
         double lowerBound; // Hungarian algorithm solution cost
-        int chosen; // Chosen subtour with illegal arcs
         bool upperBound; // Indicates wether the node is an upper bound
 
     public:
-        void prohibitArcs(int dimension, double ** newMatrix, double ** originalMatrix);
-        void printSolution(double time);
+        void verifiesNode (int dimension);
 
-        bool getUpperBound();
-        double getLowerBound();
-        vector <int> getChosenSubtour();
-        vector <pair <int, int>> getProhibitedArcs();
-
-        void setProhibitedArc(pair <int, int> arc);
-        void setProhibitedArcs(vector <pair <int, int>> arcs);
+        void setIllegalEdges ();
+        void setMultipliers (vector <double> multipliers);
         void setLowerBound(double lowerBound);
+        void setGraph(vector <pair <int, int>> graph);
+
+        double getLowerBound ();
+        bool getUpperBound ();
+        vector <int> getIllegalEdges ();
+        vector <pair <int, int>> getGraph ();
+
+        int getDegree (int vertex);
+
+    //  void prohibitArcs(int dimension, double ** newMatrix, double ** originalMatrix);
+    //  void printSolution(double time);
+
+    //  vector <int> getChosenSubtour();
+    //  vector <pair <int, int>> getProhibitedArcs();
+
+    //  void setProhibitedArc(pair <int, int> arc);
+    //  void setProhibitedArcs(vector <pair <int, int>> arcs);
+
+
 
 };
-
 
 #endif
