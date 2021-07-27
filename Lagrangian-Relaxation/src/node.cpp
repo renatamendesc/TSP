@@ -21,20 +21,39 @@ void Node::verifiesNode (int dimension) {
 
     if (maxEdges > 2) {
         this->upperBound = false;
-        this->setIllegalEdges();
+        this->setChosenEdges();
     } else {
         this->upperBound = true;
     }
     
 }
 
-void Node::setIllegalEdges () {
+void Node::prohibitEdges (vector <vector <double>> &newDistance, vector <vector <double>> &originalDistance, int dimension) {
+
+    newDistance = originalDistance;
+
+    for (int i = 0; i < this->prohibitedEdges.size(); i++) {
+        newDistance[this->prohibitedEdges[i].first][this->prohibitedEdges[i].second] = INFINITE;
+    }
+
+}
+
+void Node::setChosenEdges () {
 
     for (int i = 0; i < this->graph.size(); i++) {
         if(this->choosenVertex == this->graph[i].first || this->choosenVertex == this->graph[i].second){
-			this->illegalEdges.push_back(i);
+            pair <int, int> prohibited;
+
+            prohibited.first = this->graph[i].first;
+            prohibited.second = this->graph[i].second;
+
+            this->chosenEdges.push_back(prohibited);
 		}
     }
+}
+
+void Node::addProhibitedEdge (pair <int, int> edge) {
+    this->prohibitedEdges.push_back(edge);
 }
 
 int Node::getDegree (int vertex) {
@@ -50,6 +69,14 @@ int Node::getDegree (int vertex) {
 	return degree;
 }
 
+vector <pair <int, int>> Node::getProhibitedEdges () {
+    return this->prohibitedEdges;
+}
+
+void Node::setProhibitedEdges (vector <pair <int, int>> edges) {
+    this->prohibitedEdges = edges;
+}
+
 void Node::setLowerBound (double lowerBound) {
     this->lowerBound = lowerBound;
 }
@@ -62,8 +89,8 @@ void Node::setGraph(vector <pair <int, int>> graph) {
     this->graph = graph;
 }
 
-vector <int> Node::getIllegalEdges (){
-    return this->illegalEdges;
+vector <pair <int, int>> Node::getChosenEdges (){
+    return this->chosenEdges;
 }
 
 double Node::getLowerBound () {

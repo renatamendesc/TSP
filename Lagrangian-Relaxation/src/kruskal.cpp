@@ -9,6 +9,7 @@ Kruskal::Kruskal(vector <vector <double>> &distance, int dimension){
 	for (int i = 1; i < dimension; i++){
 		for (int j = 1; j < dimension; j++){
 			dist[i-1][j-1] = distance[i][j];
+			// cout << "Distance [" << i-1 << "][" << j-1 << "]: " << dist[i-1][j-1] << endl;
 		}
 	}
 
@@ -61,6 +62,12 @@ void Kruskal::MST(int nodes){
 		}
 	}
 
+	// for (int i = 0; i < edges.size(); i++) {
+	// 	cout << edges[i].first << " - " << edges[i].second << endl;
+	// }
+
+	// cout << endl;
+
 	// cout << cost << endl;
 }
 
@@ -73,18 +80,18 @@ void Kruskal::change1Tree(vvi originalDist){
 	ii firstEdge, secondEdge;
 
 	for(int i = 0; i < edges.size(); i++){
-		edges[i].first = edges[i].first + 2;
-		edges[i].second = edges[i].second + 2;
+		edges[i].first = edges[i].first + 1;
+		edges[i].second = edges[i].second + 1;
 	}
 
 	// Creates new edges
-	firstEdge.first = 1;
+	firstEdge.first = 0;
 	firstEdge.second = edges[0].second;
 
 	secondEdge.first = edges[0].first;
-	secondEdge.second = 1;
+	secondEdge.second = 0;
 
-	cost += originalDist[0][edges[0].second-1] + originalDist[edges[0].first-1][0];
+	cost += originalDist[0][edges[0].second] + originalDist[edges[0].first][0];
 
 	// Adds edges
 	edges.push_back(firstEdge);

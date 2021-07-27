@@ -21,7 +21,7 @@ vector <double> Dual::stepDirection (vector <pair <int, int>> &edges, int dimens
 
 	// Calculates subgradient vector
 	for(int i = 0; i < dimension; i++){
-		subgradient[i] = 2 - getDegree(edges, i+1);
+		subgradient[i] = 2 - getDegree(edges, i);
 	}
 
 	return subgradient;
@@ -154,7 +154,7 @@ void Dual::updateLagrangianCost (vector <vector <double>> &distance, vector <dou
 	for (int i = 0; i < dimension; i++) {
 		for (int j = i+1; j < dimension; j++) {
 			distance[i][j] -= (multipliers[i] + multipliers[j]);
-			distance[j][i] -= (multipliers[i] + multipliers[j]);	
+			distance[j][i] -= (multipliers[i] + multipliers[j]);
 		}
 	}
 }
@@ -191,6 +191,8 @@ Node Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 		// Gets 1-tree edges and cost
 		spanningTree = kruskal.getEdges();
 		lowerBound = kruskal.getCost();
+
+		// cout << "Lower Bound: " << lowerBound << endl;
 
 		if (lowerBound > bestLowerBound) {
 			bestLowerBound = lowerBound;
@@ -230,7 +232,7 @@ Node Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 		updateLagrangianCost(lagragianDistance, multipliers, dimension);
 
 		// cout << endl << "Upper Bound: " << upperBound << endl;
-		// cout << "Lower Bound: " << bestLowerBound << endl;
+		// break;
 
 	}
 
