@@ -57,6 +57,8 @@ void search (vector <vector <double>> &distance, int dimension) {
 
 				lagrangian.lagrangianDual(newNode, changingDistance, dimension);
 
+				cout << "Lower Bound: " << newNode.getLowerBound() << endl;
+
 				if (newNode.getLowerBound() < cost) {
 					newNode.verifiesNode(dimension);
 					tree.push_back(newNode);
