@@ -169,10 +169,10 @@ bool Dual::validateSubgradient (vector <double> &subgradient) {
 
 }
 
-Node Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistance, int dimension) {
+void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistance, int dimension) {
 
 	vector <pair <int, int>> spanningTree, solution;
-	vector <vector <double>> lagragianDistance = originalDistance;
+	vector <vector <double>> lagragianDistance;
 	vector <double> subgradient, multipliers, bestMultipliers, lastMultipliers (dimension);
 	
 	double epsilon, upperBound, lowerBound, bestLowerBound = __DBL_MIN__;
@@ -180,9 +180,14 @@ Node Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 	if (dimension < 70) epsilon = 1;
 	else epsilon = 2;
 
+	multipliers = node.getMultipliers();
+
 	int iter = 0;
 
 	while (true) {
+
+		lagragianDistance = originalDistance;
+		updateLagrangianCost(lagragianDistance, multipliers, dimension);
 
 		// Generates first 1-tree
 		Kruskal kruskal(lagragianDistance, dimension);
@@ -191,8 +196,6 @@ Node Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 		// Gets 1-tree edges and cost
 		spanningTree = kruskal.getEdges();
 		lowerBound = kruskal.getCost();
-
-		// cout << "Lower Bound: " << lowerBound << endl;
 
 		if (lowerBound > bestLowerBound) {
 			bestLowerBound = lowerBound;
@@ -228,18 +231,18 @@ Node Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 		lastMultipliers = multipliers;
 		multipliers = stepSize(upperBound, lowerBound, epsilon, lastMultipliers, subgradient, dimension);
 
-		lagragianDistance = originalDistance;
-		updateLagrangianCost(lagragianDistance, multipliers, dimension);
-
-		// cout << endl << "Upper Bound: " << upperBound << endl;
-		// break;
-
 	}
+
+	cout << endl;
+
+	for (int i = 0; i < solution.size(); i++) {
+		cout << solution[i].first << " - " << solution[i].second << endl;
+	}
+
+	cout << endl;
 
     node.setLowerBound(bestLowerBound);
     node.setMultipliers(bestMultipliers);
     node.setGraph(solution);
-
-    return node;
 
 }

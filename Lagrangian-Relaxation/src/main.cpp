@@ -14,19 +14,21 @@ void search (vector <vector <double>> &distance, int dimension) {
 
 	Dual lagrangian;
 	Node root, solution;
-	vector <vector <double>> changingDistance;
 
 	double cost = __DBL_MAX__;
 
-	root = lagrangian.lagrangianDual(root, distance, dimension); // Calculates root
+	vector <vector <double>> changingDistance = distance;
+	vector <double> rootMultiplier (dimension);
+
+	root.setMultipliers(rootMultiplier);
+
+	lagrangian.lagrangianDual(root, changingDistance, dimension); // Calculates root
 	root.verifiesNode (dimension); // Verifies information
 
 	vector <Node> tree;
 	tree.push_back(root); // Adds on tree
 
-	for (int i = 0; i < root.getChosenEdges().size(); i++) {
-		cout << root.getChosenEdges()[i].first << " - " << root.getChosenEdges()[i].second << endl;
-	}
+	int iter = 0;
 	
 	while (!tree.empty()) {
 
@@ -38,9 +40,12 @@ void search (vector <vector <double>> &distance, int dimension) {
 
 			for (int i = 0; i < node.getChosenEdges().size(); i++) {
 
+				cout << root.getChosenEdges()[i].first << " - " << root.getChosenEdges()[i].second << endl;
+
 				Node newNode;
 
 				newNode.setProhibitedEdges(node.getProhibitedEdges());
+				newNode.setMultipliers(node.getMultipliers());
 
 				pair <int, int> edge;
 
@@ -48,9 +53,9 @@ void search (vector <vector <double>> &distance, int dimension) {
 				edge.second = node.getChosenEdges()[i].second;
 
 				newNode.addProhibitedEdge(edge);
-				newNode.prohibitEdges(changingDistance, distance, dimension);
+				newNode.prohibitEdges(changingDistance, distance);
 
-				newNode = lagrangian.lagrangianDual(newNode, changingDistance, dimension);
+				lagrangian.lagrangianDual(newNode, changingDistance, dimension);
 
 				if (newNode.getLowerBound() < cost) {
 					newNode.verifiesNode(dimension);
@@ -59,7 +64,7 @@ void search (vector <vector <double>> &distance, int dimension) {
 				
 			}
 
-			// cout << "LOWER BOUND" << endl;
+			cout << endl << "LOWER BOUND" << endl;
 
 		} else {
 
@@ -68,18 +73,21 @@ void search (vector <vector <double>> &distance, int dimension) {
 				solution = node;
 			}
 
-			// cout << "UPPER BOUND" << endl;
+			cout << endl << "UPPER BOUND" << endl;
 		}
 
-		break;
+		if (iter > 1) break;
 
 		clock_t end = clock();
 		double time = ((double) (end - start)) / CLOCKS_PER_SEC;
+		cout << "Time: " << time << endl;
+
 		if (time > 600) break;
 
+		iter++;
 	}
 
-	cout << "Time: " << time << endl;
+	cout << endl << "Cost: " << cost << endl;
 
 }
 
@@ -96,7 +104,6 @@ int main (int argc, char** argv) {
 	for (int i = 0; i < dimension; i++) {
 		for (int j = 0; j < dimension; j++) {
 			distance[i][j] = data->getDistance(i, j);
-			// cout << "Distance [" << i << "][" << j << "]: " << distance[i][j] << endl;
 		}
 	}
 

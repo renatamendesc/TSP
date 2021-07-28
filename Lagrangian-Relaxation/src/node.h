@@ -25,7 +25,7 @@ class Node {
 
     public:
         void verifiesNode(int dimension);
-        void prohibitEdges(vector <vector <double>> &newDistance, vector <vector <double>> &originalDistance, int dimension);
+        void prohibitEdges(vector <vector <double>> &newDistance, vector <vector <double>> &originalDistance);
 
         void setChosenEdges();
         void setProhibitedEdges(vector <pair <int, int>> edges);
@@ -36,6 +36,7 @@ class Node {
         void setLowerBound(double lowerBound);
         void setGraph(vector <pair <int, int>> graph);
 
+        vector <double> getMultipliers();
         double getLowerBound();
         bool getUpperBound();
 

@@ -17,8 +17,6 @@ void Node::verifiesNode (int dimension) {
 
     }
 
-    cout << "Choosen vertex: " << this->choosenVertex << endl;
-
     if (maxEdges > 2) {
         this->upperBound = false;
         this->setChosenEdges();
@@ -28,12 +26,14 @@ void Node::verifiesNode (int dimension) {
     
 }
 
-void Node::prohibitEdges (vector <vector <double>> &newDistance, vector <vector <double>> &originalDistance, int dimension) {
+void Node::prohibitEdges (vector <vector <double>> &newDistance, vector <vector <double>> &originalDistance) {
 
     newDistance = originalDistance;
 
     for (int i = 0; i < this->prohibitedEdges.size(); i++) {
         newDistance[this->prohibitedEdges[i].first][this->prohibitedEdges[i].second] = INFINITE;
+        newDistance[this->prohibitedEdges[i].second][this->prohibitedEdges[i].first] = INFINITE;
+        // cout <<  endl << "Proibindo: " << this->prohibitedEdges[i].first << " e " << this->prohibitedEdges[i].second << endl;
     }
 
 }
@@ -67,6 +67,10 @@ int Node::getDegree (int vertex) {
 	}
 
 	return degree;
+}
+
+vector <double> Node::getMultipliers () {
+    return this->multipliers;
 }
 
 vector <pair <int, int>> Node::getProhibitedEdges () {

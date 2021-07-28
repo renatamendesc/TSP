@@ -10,7 +10,7 @@
 class Dual {
 
     public:
-        Node lagrangianDual (Node &node, std::vector <std::vector <double>> &originalDistance, int dimension);
+        void lagrangianDual (Node &node, std::vector <std::vector <double>> &originalDistance, int dimension);
 
         std::vector <double> stepDirection (std::vector <std::pair <int, int>> &edges, int dimension);
         std::vector <double> stepSize (double upperBound, double lowerBound, double epsilon, std::vector <double> &lastSubgradient, std::vector <double> &subgradient, int dimension);
