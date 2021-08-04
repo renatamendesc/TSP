@@ -32,13 +32,16 @@ void Node::prohibitEdges (vector <vector <double>> &newDistance, vector <vector 
 
     for (int i = 0; i < this->prohibitedEdges.size(); i++) {
         newDistance[this->prohibitedEdges[i].first][this->prohibitedEdges[i].second] = INFINITE;
-        newDistance[this->prohibitedEdges[i].second][this->prohibitedEdges[i].first] = INFINITE;
-        // cout <<  endl << "Proibindo: " << this->prohibitedEdges[i].first << " e " << this->prohibitedEdges[i].second << endl;
+        // newDistance[this->prohibitedEdges[i].second][this->prohibitedEdges[i].first] = INFINITE;
+
+        cout <<  endl << "Proibindo: " << this->prohibitedEdges[i].first << " e " << this->prohibitedEdges[i].second << endl;
     }
 
 }
 
 void Node::setChosenEdges () {
+
+    // cout << "Lista proibidos: " << endl;
 
     for (int i = 0; i < this->graph.size(); i++) {
         if(this->choosenVertex == this->graph[i].first || this->choosenVertex == this->graph[i].second){
@@ -46,6 +49,8 @@ void Node::setChosenEdges () {
 
             prohibited.first = this->graph[i].first;
             prohibited.second = this->graph[i].second;
+
+            cout << prohibited.first << " - " << prohibited.second << endl;
 
             this->chosenEdges.push_back(prohibited);
 		}

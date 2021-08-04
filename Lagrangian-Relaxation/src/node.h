@@ -47,17 +47,6 @@ class Node {
 
         int getDegree(int vertex);
 
-    //  void prohibitArcs(int dimension, double ** newMatrix, double ** originalMatrix);
-    //  void printSolution(double time);
-
-    //  vector <int> getChosenSubtour();
-    //  vector <pair <int, int>> getProhibitedArcs();
-
-    //  void setProhibitedArc(pair <int, int> arc);
-    //  void setProhibitedArcs(vector <pair <int, int>> arcs);
-
-
-
 };
 
 #endif

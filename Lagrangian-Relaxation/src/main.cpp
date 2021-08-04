@@ -15,7 +15,7 @@ void search (vector <vector <double>> &distance, int dimension) {
 	Dual lagrangian;
 	Node root, solution;
 
-	double cost = __DBL_MAX__;
+	double cost = INFINITE;
 
 	vector <vector <double>> changingDistance = distance;
 	vector <double> rootMultiplier (dimension);
@@ -36,13 +36,20 @@ void search (vector <vector <double>> &distance, int dimension) {
 		Node node = tree.back();
 		tree.erase(tree.end());
 
+		// cout << "LB new node: " << node.getLowerBound() << endl;
+
 		if (!node.getUpperBound()) {
 
 			for (int i = 0; i < node.getChosenEdges().size(); i++) {
 
-				cout << root.getChosenEdges()[i].first << " - " << root.getChosenEdges()[i].second << endl;
-
 				Node newNode;
+
+				// cout << "Novo proibido: " << node.getChosenEdges()[i].first << " - " << node.getChosenEdges()[i].second << endl;
+
+				// cout << "Antigos proibidos: " << endl;
+				// for (int i  = 0; i < node.getProhibitedEdges().size(); i++) {
+				// 	cout << node.getProhibitedEdges()[i].first << " - " << node.getProhibitedEdges()[i].second << endl;
+				// }
 
 				newNode.setProhibitedEdges(node.getProhibitedEdges());
 				newNode.setMultipliers(node.getMultipliers());
@@ -62,6 +69,12 @@ void search (vector <vector <double>> &distance, int dimension) {
 				if (newNode.getLowerBound() < cost) {
 					newNode.verifiesNode(dimension);
 					tree.push_back(newNode);
+
+					cout << "VALIDO" << endl;
+
+				} else {
+					cout << "INVALIDO" << endl;
+
 				}
 				
 			}
@@ -78,7 +91,7 @@ void search (vector <vector <double>> &distance, int dimension) {
 			cout << endl << "UPPER BOUND" << endl;
 		}
 
-		if (iter < 1) break;
+		if (iter > 100) break;
 
 		clock_t end = clock();
 		double time = ((double) (end - start)) / CLOCKS_PER_SEC;
