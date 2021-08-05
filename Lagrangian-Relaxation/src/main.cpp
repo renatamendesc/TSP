@@ -91,7 +91,7 @@ void search (vector <vector <double>> &distance, int dimension) {
 			cout << endl << "UPPER BOUND" << endl;
 		}
 
-		if (iter > 100) break;
+		if (iter > 600) break;
 
 		clock_t end = clock();
 		double time = ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -103,6 +103,7 @@ void search (vector <vector <double>> &distance, int dimension) {
 	}
 
 	cout << endl << "Cost: " << cost << endl;
+	cout << "Time: " << time << endl;
 
 }
 

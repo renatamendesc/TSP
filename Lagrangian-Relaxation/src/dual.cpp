@@ -107,7 +107,7 @@ bool Dual::subtourSearch (vector <pair <int, int>> graph, int dimension) {
 	return false;
 }
 
-double Dual::primalBound (vector <vector <double>> &distance, int dimension) {
+double Dual::primalBound (vector <vector <double>> &originalDistance, vector <vector <double>> &distance, int dimension) {
 
 	priority_queue <pair <double, pair <int, int>>> graph;
 	double cost = 0;
@@ -153,8 +153,10 @@ void Dual::updateLagrangianCost (vector <vector <double>> &distance, vector <dou
 
 	for (int i = 0; i < dimension; i++) {
 		for (int j = i+1; j < dimension; j++) {
-			distance[i][j] -= (multipliers[i] + multipliers[j]);
-			distance[j][i] -= (multipliers[i] + multipliers[j]);
+			if(distance[i][j] != INFINITE) {
+				distance[i][j] -= (multipliers[i] + multipliers[j]);
+				distance[j][i] -= (multipliers[i] + multipliers[j]);
+			}
 		}
 	}
 }
@@ -215,7 +217,7 @@ void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 			}
 		}
 
-		upperBound = primalBound(lagragianDistance, dimension);
+		upperBound = primalBound(originalDistance, lagragianDistance, dimension);
 		if (upperBound - lowerBound <= epsilon) break;
 
 		subgradient = stepDirection(spanningTree, dimension);
@@ -231,12 +233,14 @@ void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 		lastMultipliers = multipliers;
 		multipliers = stepSize(upperBound, lowerBound, epsilon, lastMultipliers, subgradient, dimension);
 
+
 	}
 
 	cout << endl;
 
 	for (int i = 0; i < solution.size(); i++) {
-		cout << solution[i].first << " - " << solution[i].second << endl;
+		cout << solution[i].first << " - " << solution[i].second << " " << originalDistance[solution[i].first][solution[i].second]<< endl;
+		
 	}
 
 	cout << endl;

@@ -32,7 +32,7 @@ void Node::prohibitEdges (vector <vector <double>> &newDistance, vector <vector 
 
     for (int i = 0; i < this->prohibitedEdges.size(); i++) {
         newDistance[this->prohibitedEdges[i].first][this->prohibitedEdges[i].second] = INFINITE;
-        // newDistance[this->prohibitedEdges[i].second][this->prohibitedEdges[i].first] = INFINITE;
+        newDistance[this->prohibitedEdges[i].second][this->prohibitedEdges[i].first] = INFINITE;
 
         cout <<  endl << "Proibindo: " << this->prohibitedEdges[i].first << " e " << this->prohibitedEdges[i].second << endl;
     }
