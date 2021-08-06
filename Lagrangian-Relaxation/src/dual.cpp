@@ -171,7 +171,7 @@ bool Dual::validateSubgradient (vector <double> &subgradient) {
 
 }
 
-void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistance, int dimension) {
+void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistance, double upperBound, int dimension) {
 
 	vector <pair <int, int>> spanningTree, solution;
 	vector <vector <double>> lagragianDistance;

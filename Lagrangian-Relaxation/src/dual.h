@@ -16,9 +16,9 @@ class Dual {
         std::vector <double> stepSize (double upperBound, double lowerBound, double epsilon, std::vector <double> &lastSubgradient, std::vector <double> &subgradient, int dimension);
 
         bool subtourSearch (std::vector <std::pair <int, int>> graph, int dimension);
-        double primalBound (std::vector <std::vector <double>> &originalDistance, std::vector <std::vector <double>> &distance, int dimension);
+        // double primalBound (std::vector <std::vector <double>> &originalDistance, std::vector <std::vector <double>> &distance, int dimension);
 
-        void updateLagrangianCost (std::vector <std::vector <double>> &distance, std::vector <double> &multipliers, int dimension);
+        void updateLagrangianCost (std::vector <std::vector <double>> &distance, std::vector <double> &multipliers, double upperBound, int dimension);
         bool validateSubgradient (std::vector <double> &subgradient);
 
         int getDegree (std::vector <std::pair <int, int>> &edges, int vertex);
