@@ -61,14 +61,6 @@ void Kruskal::MST(int nodes){
 			unionSet(p.second.first, p.second.second);
 		}
 	}
-
-	// for (int i = 0; i < edges.size(); i++) {
-	// 	cout << edges[i].first << " - " << edges[i].second << endl;
-	// }
-
-	// cout << endl;
-
-	// cout << cost << endl;
 }
 
 double Kruskal::getCost() {
@@ -79,19 +71,34 @@ void Kruskal::change1Tree(vvi originalDist){
 
 	ii firstEdge, secondEdge;
 
+	double bestDist = __DBL_MAX__;
+
+	priority_queue <pair <double, ii>> bestDistances;
+	
 	for(int i = 0; i < edges.size(); i++){
-		edges[i].first = edges[i].first + 1;
-		edges[i].second = edges[i].second + 1;
+
+		edges[i].first++;
+		edges[i].second++;
+
+	}
+
+	for (int i = 0; i < originalDist.size(); i++) {
+
+		double dist = originalDist[i][0];
+		bestDistances.push(make_pair(-dist, make_pair(edges[i].first, 0)));
+
 	}
 
 	// Creates new edges
 	firstEdge.first = 0;
-	firstEdge.second = edges[0].second;
+	firstEdge.second = bestDistances.top().second.first;
 
-	secondEdge.first = edges[0].first;
+	bestDistances.pop();
+
+	secondEdge.first = bestDistances.top().second.first;
 	secondEdge.second = 0;
 
-	cost += originalDist[0][edges[0].second] + originalDist[edges[0].first][0];
+	cost += originalDist[0][firstEdge.second] + originalDist[secondEdge.first][0];
 
 	// Adds edges
 	edges.push_back(firstEdge);

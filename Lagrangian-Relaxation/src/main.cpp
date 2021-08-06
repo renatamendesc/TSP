@@ -124,7 +124,7 @@ void search (vector <vector <double>> &distance, int dimension, int type) {
 			cout << endl << "UPPER BOUND" << endl;
 		}
 
-		if (iter > 1000) break;
+		if (iter > 0) break;
 
 		clock_t end = clock();
 		time = ((double) (end - start)) / CLOCKS_PER_SEC;
