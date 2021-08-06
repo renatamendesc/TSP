@@ -5,17 +5,26 @@
 
 #include <iostream>
 #include <vector>
+#include <queue>
 
 using namespace std;
 
-void search (vector <vector <double>> &distance, int dimension) {
+// Function to specify priority_queue's sequence
+bool operator < (Node a, Node b){
+	return a.getLowerBound() > b.getLowerBound();
+}
+
+void search (vector <vector <double>> &distance, int dimension, int type) {
 
 	clock_t start = clock(); // Starts time counting
 
 	Dual lagrangian;
 	Node root, solution;
 
-	double cost = INFINITE;
+	double time, cost = INFINITE;
+
+	vector <Node> tree;
+	priority_queue <Node> bestBoundTree;
 
 	vector <vector <double>> changingDistance = distance;
 	vector <double> rootMultiplier (dimension);
@@ -25,18 +34,34 @@ void search (vector <vector <double>> &distance, int dimension) {
 	lagrangian.lagrangianDual(root, changingDistance, dimension); // Calculates root
 	root.verifiesNode (dimension); // Verifies information
 
-	vector <Node> tree;
-	tree.push_back(root); // Adds on tree
+	solution = root;
+
+	// Adds on tree
+	if (type == 1) {
+		bestBoundTree.push(root);
+	} else {
+		tree.push_back(root);
+	}
 
 	int iter = 0;
 	
-	while (!tree.empty()) {
+	while (!tree.empty() || !bestBoundTree.empty()) {
 
-		// Depth search
-		Node node = tree.back();
-		tree.erase(tree.end());
+		Node node;
+		
+		if (type == 1) {
+			node = bestBoundTree.top();
+			bestBoundTree.pop();
 
-		// cout << "LB new node: " << node.getLowerBound() << endl;
+		} else if (type == 2) {
+			node = tree.front();
+			tree.erase(tree.begin());
+
+		} else if (type == 3) {
+			node = tree.back();
+			tree.erase(tree.end());
+
+		}
 
 		if (!node.getUpperBound()) {
 
@@ -54,6 +79,7 @@ void search (vector <vector <double>> &distance, int dimension) {
 				newNode.setProhibitedEdges(node.getProhibitedEdges());
 				newNode.setMultipliers(node.getMultipliers());
 
+				// Illegal edge
 				pair <int, int> edge;
 
 				edge.first = node.getChosenEdges()[i].first;
@@ -68,11 +94,18 @@ void search (vector <vector <double>> &distance, int dimension) {
 
 				if (newNode.getLowerBound() < cost) {
 					newNode.verifiesNode(dimension);
-					tree.push_back(newNode);
+
+					// Adds new node
+					if (type == 1) {
+						bestBoundTree.push(newNode);
+					} else {
+						tree.push_back(newNode);
+					}
 
 					cout << "VALIDO" << endl;
 
 				} else {
+		
 					cout << "INVALIDO" << endl;
 
 				}
@@ -91,10 +124,10 @@ void search (vector <vector <double>> &distance, int dimension) {
 			cout << endl << "UPPER BOUND" << endl;
 		}
 
-		if (iter > 600) break;
+		if (iter > 1000) break;
 
 		clock_t end = clock();
-		double time = ((double) (end - start)) / CLOCKS_PER_SEC;
+		time = ((double) (end - start)) / CLOCKS_PER_SEC;
 		cout << "Time: " << time << endl;
 
 		if (time > 600) break;
@@ -112,7 +145,7 @@ int main (int argc, char** argv) {
 	Data *data = new Data(argc, argv[1]);
 	data->readData();
 
-	int dimension = data->getDimension();
+	int dimension = data->getDimension(), type;
 
 	vector <vector <double>> distance (dimension, vector <double> (dimension));
 
@@ -123,7 +156,34 @@ int main (int argc, char** argv) {
 		}
 	}
 
-	search(distance, dimension);
+	cout << endl << "Select your search method: " << endl << endl;
+
+	int option;
+
+	cout << "[1] Best bound" << endl;
+	cout << "[2] Breadth" << endl;
+	cout << "[3] Depth" << endl;
+
+	cout << endl << "Option: ";
+	cin >> option;
+
+	switch (option) {
+
+		case 1:
+			type = 1; 
+			break;
+
+		case 2:
+			type = 2;
+			break;
+
+		case 3:
+			type = 3;
+			break;
+
+	}
+
+	search(distance, dimension, type);
 
 	delete data;
 
