@@ -9,7 +9,6 @@ Kruskal::Kruskal(vector <vector <double>> &distance, int dimension){
 	for (int i = 1; i < dimension; i++){
 		for (int j = 1; j < dimension; j++){
 			dist[i-1][j-1] = distance[i][j];
-			// cout << "Distance [" << i-1 << "][" << j-1 << "]: " << dist[i-1][j-1] << endl;
 		}
 	}
 
@@ -71,39 +70,50 @@ void Kruskal::change1Tree(vvi originalDist){
 
 	ii firstEdge, secondEdge;
 
-	double bestDist = __DBL_MAX__;
+	int dimension = originalDist.size();
 
-	priority_queue <pair <double, ii>> bestDistances;
-	
-	for(int i = 0; i < edges.size(); i++){
-
-		edges[i].first++;
-		edges[i].second++;
-
-	}
-
-	for (int i = 0; i < originalDist.size(); i++) {
-
-		double dist = originalDist[i][0];
-		bestDistances.push(make_pair(-dist, make_pair(edges[i].first, 0)));
-
-	}
-
-	// Creates new edges
+	// Creates edges
 	firstEdge.first = 0;
-	firstEdge.second = bestDistances.top().second.first;
-
-	bestDistances.pop();
-
-	secondEdge.first = bestDistances.top().second.first;
 	secondEdge.second = 0;
 
-	cost += originalDist[0][firstEdge.second] + originalDist[secondEdge.first][0];
+	double bestDist = __DBL_MAX__;
+	
+	for(int i = 0; i < edges.size(); i++){
+		edges[i].first++;
+		edges[i].second++;
+	}
 
-	// Adds edges
+	for (int i = 0; i < dimension; i++) {
+
+		double dist = originalDist[i][0];
+
+		if (dist < bestDist) {
+			bestDist = dist;
+			firstEdge.second = i;
+		}
+
+	}
+
+	// Adds new edge
+	cost += originalDist[firstEdge.first][firstEdge.second];
 	edges.push_back(firstEdge);
-	edges.push_back(secondEdge);
 
-	// cout << "Oi!" << endl;
+	originalDist[firstEdge.second][0] = __DBL_MAX__;
+	bestDist = __DBL_MAX__;
+
+	for (int i = 0; i < dimension; i++) {
+
+		double dist = originalDist[i][0];
+
+		if (dist < bestDist) {
+			bestDist = dist;
+			secondEdge.first = i;
+		}
+
+	}
+
+	// Adds new edge
+	cost += originalDist[secondEdge.first][secondEdge.second];
+	edges.push_back(secondEdge);
 
 }

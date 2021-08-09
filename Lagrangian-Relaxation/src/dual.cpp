@@ -50,14 +50,10 @@ void Dual::updateLagrangianCost (vector <vector <double>> &distance, vector <dou
 
 	for (int i = 0; i < dimension; i++) {
 		for (int j = i+1; j < dimension; j++) {
-			if(distance[i][j] != INFINITE) {
-				distance[i][j] -= (multipliers[i] + multipliers[j]);
-				distance[j][i] -= (multipliers[i] + multipliers[j]);
-			}
+			distance[i][j] -= (multipliers[i] + multipliers[j]);
+			distance[j][i] -= (multipliers[i] + multipliers[j]);
 		}
 	}
-
-	// cout << "oi2" << endl;
 }
 
 bool Dual::validateSubgradient (vector <double> &subgradient) {
@@ -133,15 +129,6 @@ void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 		multipliers = stepSize(upperBound, lowerBound, epsilon, lastMultipliers, subgradient, dimension);
 
 	}
-
-	cout << endl;
-
-	for (int i = 0; i < solution.size(); i++) {
-		cout << solution[i].first << " - " << solution[i].second << " " << originalDistance[solution[i].first][solution[i].second]<< endl;
-		
-	}
-
-	cout << endl;
 
     node.setLowerBound(bestLowerBound);
     node.setMultipliers(bestMultipliers);

@@ -121,8 +121,6 @@ double primalBound (vector <vector <double>> &distance, int dimension) {
 
 	}
 
-	// cout << "cost: " << cost << endl;
-
 	return cost;
 }
 
@@ -201,8 +199,6 @@ void search (vector <vector <double>> &distance, double upperBound, int dimensio
 
 				lagrangian.lagrangianDual(newNode, changingDistance, upperBound, dimension);
 
-				cout << "Lower Bound: " << newNode.getLowerBound() << endl;
-
 				if (newNode.getLowerBound() < cost) {
 					newNode.verifiesNode(dimension);
 
@@ -212,18 +208,8 @@ void search (vector <vector <double>> &distance, double upperBound, int dimensio
 					} else {
 						tree.push_back(newNode);
 					}
-
-					cout << "VALIDO" << endl;
-
-				} else {
-		
-					cout << "INVALIDO" << endl;
-
 				}
-				
 			}
-
-			cout << endl << "LOWER BOUND" << endl;
 
 		} else {
 
@@ -232,14 +218,10 @@ void search (vector <vector <double>> &distance, double upperBound, int dimensio
 				solution = node;
 			}
 
-			cout << endl << "UPPER BOUND" << endl;
 		}
-
-		if (iter > 0) break;
 
 		clock_t end = clock();
 		time = ((double) (end - start)) / CLOCKS_PER_SEC;
-		cout << "Time: " << time << endl;
 
 		if (time > 600) break;
 
@@ -247,7 +229,7 @@ void search (vector <vector <double>> &distance, double upperBound, int dimensio
 	}
 
 	cout << endl << "Cost: " << cost << endl;
-	cout << "Time: " << time << endl;
+	cout << "Time: " << time << endl << endl;
 
 }
 
