@@ -21,7 +21,7 @@ vector <double> Dual::stepDirection (vector <pair <int, int>> &edges, int dimens
 
 	// Calculates subgradient vector
 	for(int i = 0; i < dimension; i++){
-		subgradient[i] = 2 - getDegree(edges, i);
+		subgradient[i] = 2 - this->getDegree(edges, i);
 	}
 
 	return subgradient;
@@ -46,109 +46,6 @@ vector <double> Dual::stepSize (double upperBound, double lowerBound, double eps
 
 }
 
-bool Dual::subtourSearch (vector <pair <int, int>> graph, int dimension) {
-
-	pair <int, int> depot;
-	bool changeDepot = false;
-
-	while (!graph.empty()) {
-
-		if (!changeDepot) {
-
-			depot.first = graph[0].first;
-			depot.second = graph[0].second;
-
-			graph.erase(graph.begin());
-
-		}
-
-		changeDepot = false;
-
-		for (int i = 0; i < graph.size(); i++) {
-
-			if ((graph[i].first == depot.first && graph[i].second == depot.second) || (graph[i].second == depot.first && graph[i].first == depot.second)) {
-				
-				return true;
-
-			} else {
-
-				if (depot.first == graph[i].first) {
-
-					depot.first = graph[i].second;
-					changeDepot = true;	
-
-				} else if (depot.first == graph[i].second) {
-
-					depot.first = graph[i].first;
-					changeDepot = true;	
-
-				} else if (depot.second == graph[i].first) {
-
-					depot.second = graph[i].second;
-					changeDepot = true;	
-
-				} else if (depot.second == graph[i].second) {
-
-					depot.second = graph[i].first;
-					changeDepot = true;	
-
-				}
-
-				if (changeDepot) {
-
-					graph.erase(graph.begin() + i);
-					break;
-
-				}
-			}
-		}
-	}
-
-	return false;
-}
-
-double Dual::primalBound (vector <vector <double>> &originalDistance, vector <vector <double>> &distance, int dimension) {
-
-	priority_queue <pair <double, pair <int, int>>> graph;
-	double cost = 0;
-
-	// Creates graph
-	for (int i = 0; i < dimension; ++i) {
-		for (int j = 0; j < dimension; ++j) {
-			graph.push(make_pair(-distance[i][j], make_pair(i, j)));
-		}	
-	}
-
-	vector <pair <int, int>> edges, edgesTest;
-
-	while (edges.size() < dimension) {
-
-		pair <double, pair <int, int>> edge = graph.top();
-		graph.pop();
-
-		edgesTest = edges;
-		edgesTest.push_back(edge.second);
-
-		if ((getDegree(edgesTest, edge.second.first) <= 2) && (getDegree(edgesTest, edge.second.second) <= 2)) { // Validates node degree
-
-			if (edges.size() != dimension - 1) {
-
-				if (subtourSearch(edgesTest, dimension)) continue; // Validates subtours
-				
-			}
-
-			// Adds edge if not illegal
-			edges = edgesTest;
-			cost += -edge.first;
-
-		}
-
-	}
-
-	return cost;
-
-}
-
 void Dual::updateLagrangianCost (vector <vector <double>> &distance, vector <double> &multipliers, int dimension) {
 
 	for (int i = 0; i < dimension; i++) {
@@ -159,6 +56,8 @@ void Dual::updateLagrangianCost (vector <vector <double>> &distance, vector <dou
 			}
 		}
 	}
+
+	// cout << "oi2" << endl;
 }
 
 bool Dual::validateSubgradient (vector <double> &subgradient) {
@@ -177,7 +76,7 @@ void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 	vector <vector <double>> lagragianDistance;
 	vector <double> subgradient, multipliers, bestMultipliers, lastMultipliers (dimension);
 	
-	double epsilon, upperBound, lowerBound, bestLowerBound = __DBL_MIN__;
+	double epsilon, lowerBound, bestLowerBound = __DBL_MIN__;
 
 	if (dimension < 70) epsilon = 1;
 	else epsilon = 2;
@@ -217,7 +116,7 @@ void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 			}
 		}
 
-		upperBound = primalBound(originalDistance, lagragianDistance, dimension);
+		// upperBound = primalBound(originalDistance, lagragianDistance, dimension);
 		if (upperBound - lowerBound <= epsilon) break;
 
 		subgradient = stepDirection(spanningTree, dimension);
@@ -232,7 +131,6 @@ void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 
 		lastMultipliers = multipliers;
 		multipliers = stepSize(upperBound, lowerBound, epsilon, lastMultipliers, subgradient, dimension);
-
 
 	}
 

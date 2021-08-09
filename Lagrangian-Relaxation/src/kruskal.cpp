@@ -104,4 +104,6 @@ void Kruskal::change1Tree(vvi originalDist){
 	edges.push_back(firstEdge);
 	edges.push_back(secondEdge);
 
+	// cout << "Oi!" << endl;
+
 }

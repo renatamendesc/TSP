@@ -9,12 +9,130 @@
 
 using namespace std;
 
+int getDegree (vector <pair <int, int>> &edges, int vertex) {
+
+	int degree = 0;
+
+	for(int j = 0; j < edges.size(); j++){
+		if(vertex == edges[j].first || vertex == edges[j].second){
+			degree++;
+		}
+	}
+
+	return degree;
+}
+
+bool subtourSearch (vector <pair <int, int>> graph, int dimension) {
+
+	pair <int, int> depot;
+	bool changeDepot = false;
+
+	while (!graph.empty()) {
+
+		if (!changeDepot) {
+
+			depot.first = graph[0].first;
+			depot.second = graph[0].second;
+
+			graph.erase(graph.begin());
+
+		}
+
+		changeDepot = false;
+
+		for (int i = 0; i < graph.size(); i++) {
+
+			if ((graph[i].first == depot.first && graph[i].second == depot.second) || (graph[i].second == depot.first && graph[i].first == depot.second)) {
+				
+				return true;
+
+			} else {
+
+				if (depot.first == graph[i].first) {
+
+					depot.first = graph[i].second;
+					changeDepot = true;	
+
+				} else if (depot.first == graph[i].second) {
+
+					depot.first = graph[i].first;
+					changeDepot = true;	
+
+				} else if (depot.second == graph[i].first) {
+
+					depot.second = graph[i].second;
+					changeDepot = true;	
+
+				} else if (depot.second == graph[i].second) {
+
+					depot.second = graph[i].first;
+					changeDepot = true;	
+
+				}
+
+				if (changeDepot) {
+
+					graph.erase(graph.begin() + i);
+					break;
+
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+double primalBound (vector <vector <double>> &distance, int dimension) {
+
+	priority_queue <pair <double, pair <int, int>>> graph;
+	double cost = 0;
+
+	// Creates graph
+	for (int i = 0; i < dimension; ++i) {
+		for (int j = 0; j < dimension; ++j) {
+			graph.push(make_pair(-distance[i][j], make_pair(i, j)));
+		}	
+	}
+
+	vector <pair <int, int>> edges, edgesTest;
+
+	while (edges.size() < dimension) {
+
+		pair <double, pair <int, int>> edge = graph.top();
+		graph.pop();
+
+		edgesTest = edges;
+		edgesTest.push_back(edge.second);
+
+		if ((getDegree(edgesTest, edge.second.first) <= 2) && (getDegree(edgesTest, edge.second.second) <= 2)) { // Validates node degree
+
+			if (edges.size() != dimension - 1) {
+
+				if (subtourSearch(edgesTest, dimension)) continue; // Validates subtours
+				
+			}
+
+			// Adds edge if not illegal
+			edges = edgesTest;
+			cost += -edge.first;
+
+		}
+
+	}
+
+	// cout << "cost: " << cost << endl;
+
+	return cost;
+}
+
+
 // Function to specify priority_queue's sequence
 bool operator < (Node a, Node b){
 	return a.getLowerBound() > b.getLowerBound();
 }
 
-void search (vector <vector <double>> &distance, int dimension, int type) {
+void search (vector <vector <double>> &distance, double upperBound, int dimension, int type) {
 
 	clock_t start = clock(); // Starts time counting
 
@@ -31,7 +149,7 @@ void search (vector <vector <double>> &distance, int dimension, int type) {
 
 	root.setMultipliers(rootMultiplier);
 
-	lagrangian.lagrangianDual(root, changingDistance, dimension); // Calculates root
+	lagrangian.lagrangianDual(root, changingDistance, upperBound, dimension); // Calculates root
 	root.verifiesNode (dimension); // Verifies information
 
 	solution = root;
@@ -69,13 +187,6 @@ void search (vector <vector <double>> &distance, int dimension, int type) {
 
 				Node newNode;
 
-				// cout << "Novo proibido: " << node.getChosenEdges()[i].first << " - " << node.getChosenEdges()[i].second << endl;
-
-				// cout << "Antigos proibidos: " << endl;
-				// for (int i  = 0; i < node.getProhibitedEdges().size(); i++) {
-				// 	cout << node.getProhibitedEdges()[i].first << " - " << node.getProhibitedEdges()[i].second << endl;
-				// }
-
 				newNode.setProhibitedEdges(node.getProhibitedEdges());
 				newNode.setMultipliers(node.getMultipliers());
 
@@ -88,7 +199,7 @@ void search (vector <vector <double>> &distance, int dimension, int type) {
 				newNode.addProhibitedEdge(edge);
 				newNode.prohibitEdges(changingDistance, distance);
 
-				lagrangian.lagrangianDual(newNode, changingDistance, dimension);
+				lagrangian.lagrangianDual(newNode, changingDistance, upperBound, dimension);
 
 				cout << "Lower Bound: " << newNode.getLowerBound() << endl;
 
@@ -183,7 +294,9 @@ int main (int argc, char** argv) {
 
 	}
 
-	search(distance, dimension, type);
+	double upperBound = primalBound(distance, dimension);
+
+	search(distance, upperBound, dimension, type);
 
 	delete data;
 
