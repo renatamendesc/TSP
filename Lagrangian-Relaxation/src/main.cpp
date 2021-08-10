@@ -223,7 +223,7 @@ void search (vector <vector <double>> &distance, double upperBound, int dimensio
 		clock_t end = clock();
 		time = ((double) (end - start)) / CLOCKS_PER_SEC;
 
-		if (time > 600) break;
+		if (time > 1000) break;
 
 		iter++;
 	}
