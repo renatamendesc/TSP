@@ -137,7 +137,7 @@ void search (vector <vector <double>> &distance, double upperBound, int dimensio
 	Dual lagrangian;
 	Node root, solution;
 
-	double time, cost = INFINITE;
+	double time, cost = upperBound;
 
 	vector <Node> tree;
 	priority_queue <Node> bestBoundTree;
@@ -216,6 +216,8 @@ void search (vector <vector <double>> &distance, double upperBound, int dimensio
 			if (node.getLowerBound() < cost) {
 				cost = node.getLowerBound();
 				solution = node;
+
+				upperBound = cost;
 			}
 
 		}
