@@ -19,15 +19,15 @@ class Kruskal{
 		Kruskal(vector <vector <double>> &distance, int dimension);
 
 		void MST(int nodes);
+		void change1Tree(int dimension);
 
 		double getCost();
-
-		void change1Tree(vvi originalDist);
 		vii getEdges();
 
 	private:
 		priority_queue <pair <double, ii>> graph;
 		vector <int> pset;
+		vvi dist;
 		vii edges;
 
 		double cost = 0;

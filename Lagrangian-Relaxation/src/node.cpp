@@ -4,24 +4,20 @@ using namespace std;
 
 void Node::verifiesNode (int dimension) {
 
-    int maxEdges = 0;
+    if (!this->upperBound) {
 
-    for (int i = 0; i < dimension; i++) {
+        int maxEdges = INT_MAX;
 
-        int degree = this->getDegree(i);
+        for (int i = 0; i < dimension; i++) {
 
-        if (degree > maxEdges) {
-            this->choosenVertex = i;
-            maxEdges = degree;
+            if (this->subgradient[i] < maxEdges) {
+                this->chosenVertex = i;
+                maxEdges = this->subgradient[i];
+            }
+
         }
 
-    }
-
-    if (maxEdges > 2) {
-        this->upperBound = false;
         this->setChosenEdges();
-    } else {
-        this->upperBound = true;
     }
     
 }
@@ -40,32 +36,23 @@ void Node::prohibitEdges (vector <vector <double>> &newDistance, vector <vector 
 void Node::setChosenEdges () {
 
     for (int i = 0; i < this->graph.size(); i++) {
-        if(this->choosenVertex == this->graph[i].first || this->choosenVertex == this->graph[i].second){
+
+        if(this->chosenVertex == this->graph[i].first || this->chosenVertex == this->graph[i].second) {
+
             pair <int, int> prohibited;
 
             prohibited.first = this->graph[i].first;
             prohibited.second = this->graph[i].second;
 
             this->chosenEdges.push_back(prohibited);
+
 		}
+
     }
 }
 
 void Node::addProhibitedEdge (pair <int, int> edge) {
     this->prohibitedEdges.push_back(edge);
-}
-
-int Node::getDegree (int vertex) {
-
-	int degree = 0;
-
-	for(int i = 0; i < this->graph.size(); i++){
-		if(vertex == this->graph[i].first || vertex == this->graph[i].second){
-			degree++;
-		}
-	}
-
-	return degree;
 }
 
 vector <double> Node::getMultipliers () {
@@ -76,12 +63,20 @@ vector <pair <int, int>> Node::getProhibitedEdges () {
     return this->prohibitedEdges;
 }
 
+void Node::setUpperBound (bool validate) {
+    this->upperBound = validate;
+}
+
 void Node::setProhibitedEdges (vector <pair <int, int>> edges) {
     this->prohibitedEdges = edges;
 }
 
 void Node::setLowerBound (double lowerBound) {
     this->lowerBound = lowerBound;
+}
+
+void Node::setSubgradient (vector <double> subgradient) {
+    this->subgradient = subgradient;
 }
 
 void Node::setMultipliers (vector <double> multipliers) {

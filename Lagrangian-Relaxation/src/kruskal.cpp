@@ -4,18 +4,12 @@
 Kruskal::Kruskal(vector <vector <double>> &distance, int dimension){
 
 	// Changes matrix with incomplete distance
-	vector <vector <double>> dist (dimension-1, vector <double> (dimension-1));
+	this->dist = distance;
 
-	for (int i = 1; i < dimension; i++){
-		for (int j = 1; j < dimension; j++){
-			dist[i-1][j-1] = distance[i][j];
+	for (int i = 0; i < dimension-1; i++) {
+		for (int j = 0; j < dimension-1; j++){
+			graph.push(make_pair(-dist[i+1][j+1], make_pair(i, j)));
 		}
-	}
-
-	for(int i = 0; i < dimension-1; ++i){
-		for(int j = 0; j < dimension-1; ++j){
-			graph.push(make_pair(-dist[i][j], make_pair(i, j)));
-		}	
 	}
 
 	MST(dimension-1);
@@ -66,11 +60,9 @@ double Kruskal::getCost() {
 	return cost;
 }
 
-void Kruskal::change1Tree(vvi originalDist){
+void Kruskal::change1Tree(int dimension){
 
 	ii firstEdge, secondEdge;
-
-	int dimension = originalDist.size();
 
 	// Creates edges
 	firstEdge.first = 0;
@@ -85,7 +77,7 @@ void Kruskal::change1Tree(vvi originalDist){
 
 	for (int i = 0; i < dimension; i++) {
 
-		double dist = originalDist[i][0];
+		double dist = this->dist[i][0];
 
 		if (dist < bestDist) {
 			bestDist = dist;
@@ -95,15 +87,14 @@ void Kruskal::change1Tree(vvi originalDist){
 	}
 
 	// Adds new edge
-	cost += originalDist[firstEdge.first][firstEdge.second];
+	cost += this->dist[firstEdge.first][firstEdge.second];
 	edges.push_back(firstEdge);
 
-	originalDist[firstEdge.second][0] = __DBL_MAX__;
+	this->dist[firstEdge.second][0] = __DBL_MAX__;
 	bestDist = __DBL_MAX__;
-
 	for (int i = 0; i < dimension; i++) {
 
-		double dist = originalDist[i][0];
+		double dist = this->dist[i][0];
 
 		if (dist < bestDist) {
 			bestDist = dist;
@@ -113,7 +104,7 @@ void Kruskal::change1Tree(vvi originalDist){
 	}
 
 	// Adds new edge
-	cost += originalDist[secondEdge.first][secondEdge.second];
+	cost += this->dist[secondEdge.first][secondEdge.second];
 	edges.push_back(secondEdge);
 
 }

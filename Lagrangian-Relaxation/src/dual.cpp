@@ -59,10 +59,10 @@ void Dual::updateLagrangianCost (vector <vector <double>> &distance, vector <dou
 bool Dual::validateSubgradient (vector <double> &subgradient) {
 
 	for (int i  = 0; i < subgradient.size(); i++) {
-		if (subgradient[i] != 0) return true;
+		if (subgradient[i] != 0) return false;
 	}
 
-	return false;
+	return true;
 
 }
 
@@ -70,7 +70,7 @@ void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 
 	vector <pair <int, int>> spanningTree, solution;
 	vector <vector <double>> lagragianDistance;
-	vector <double> subgradient, multipliers, bestMultipliers, lastMultipliers (dimension);
+	vector <double> bestSubgradient, subgradient, multipliers, bestMultipliers, lastMultipliers (dimension);
 	
 	double epsilon, lowerBound, bestLowerBound = __DBL_MIN__;
 
@@ -88,15 +88,27 @@ void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 
 		// Generates first 1-tree
 		Kruskal kruskal(lagragianDistance, dimension);
-		kruskal.change1Tree(lagragianDistance);
+		kruskal.change1Tree(dimension);
 
 		// Gets 1-tree edges and cost
 		spanningTree = kruskal.getEdges();
 		lowerBound = kruskal.getCost();
 
+		subgradient = stepDirection(spanningTree, dimension);
+
+		if (validateSubgradient(subgradient)) {
+			bestLowerBound = lowerBound;
+			bestMultipliers = multipliers;
+			bestSubgradient = subgradient;
+			solution = spanningTree;
+
+			break;
+		}
+
 		if (lowerBound > bestLowerBound) {
 			bestLowerBound = lowerBound;
 			bestMultipliers = multipliers;
+			bestSubgradient = subgradient;
 			solution = spanningTree;
 
 			iter = 0;
@@ -115,23 +127,17 @@ void Dual::lagrangianDual (Node &node, vector <vector <double>> &originalDistanc
 		// upperBound = primalBound(originalDistance, lagragianDistance, dimension);
 		if (upperBound - lowerBound <= epsilon) break;
 
-		subgradient = stepDirection(spanningTree, dimension);
-
-		if (!validateSubgradient(subgradient)) {
-			bestLowerBound = lowerBound;
-			bestMultipliers = multipliers;
-			solution = spanningTree;
-
-			break;
-		}
-
 		lastMultipliers = multipliers;
 		multipliers = stepSize(upperBound, lowerBound, epsilon, lastMultipliers, subgradient, dimension);
 
 	}
 
     node.setLowerBound(bestLowerBound);
+	node.setSubgradient(bestSubgradient);
     node.setMultipliers(bestMultipliers);
     node.setGraph(solution);
+
+	if (validateSubgradient(bestSubgradient)) node.setUpperBound(true);
+	else node.setUpperBound(false);
 
 }

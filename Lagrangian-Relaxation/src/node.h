@@ -17,9 +17,10 @@ class Node {
         vector <pair <int, int>> prohibitedEdges;
         vector <pair <int, int>> graph;
 
+        vector <double> subgradient;
         vector <double> multipliers;
 
-        int choosenVertex;
+        int chosenVertex;
         double lowerBound; // Hungarian algorithm solution cost
         bool upperBound; // Indicates wether the node is an upper bound
 
@@ -32,6 +33,8 @@ class Node {
 
         void addProhibitedEdge(pair <int, int> edge);
 
+        void setUpperBound(bool validate);
+        void setSubgradient(vector <double> subgradient);
         void setMultipliers(vector <double> multipliers);
         void setLowerBound(double lowerBound);
         void setGraph(vector <pair <int, int>> graph);
@@ -45,7 +48,6 @@ class Node {
 
         vector <pair <int, int>> getGraph();
 
-        int getDegree(int vertex);
 
 };
 

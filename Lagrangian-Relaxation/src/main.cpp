@@ -230,12 +230,7 @@ void search (vector <vector <double>> &distance, double upperBound, int dimensio
 		iter++;
 	}
 
-	if (solution.getUpperBound()) {
-		cout << endl << "Cost: " << cost << endl;
-	} else {
-		cout << endl << "Couldn't find a feasible solution" << endl;
-	}
-
+	cout << endl << "Cost: " << cost << endl;
 	cout << "Time: " << time << endl << endl;
 
 }
