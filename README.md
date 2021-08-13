@@ -15,3 +15,8 @@ For instances which the number of vertices that we need to cover is very big, it
 
 * **Results:** Branch and Bound is an incredibly inefficient method. This happens because to find the optimal solution for the problem, we need to search the entire tree that was built, which usually gets very extense, making it impossible for the computer to find the optimal value in a good execution time for bigger instances.
 
+### 3. Lagrangian Relaxion:
+
+Another exact method that can be used when solving optimization problems is the **Lagrangian Relaxation**. This time we're are still going to consider a less restricted version of the problem, but at the same time, the method penalizes violations that were made when ignoring constraints. In practice, this relaxed problem can often be solved more easily than the original problem.
+
+* **Results:** Compared to heuristics, the Lagrangian Relaxation is still not a very efficient method, even though that it can give us the optimal solution to smaller instances in a few seconds. But when we're trying to solve bigger instances, from about 100 customers, we may have problems with finding the optimal solution in a good execution time.
