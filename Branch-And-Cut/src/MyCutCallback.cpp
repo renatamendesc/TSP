@@ -59,6 +59,8 @@ void MyCutCallback::main()
 		}
 	}
 	
+	x_vals.end();
+
 	cutSetPool = MaxBack(x_edge, n);
 	
 	if (cutSetPool.empty() && depth <= 7) {
