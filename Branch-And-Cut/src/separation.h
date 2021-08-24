@@ -28,8 +28,14 @@ typedef struct{
     bool is_vertexA;
 } vertex_type;
 
-extern vector <vector<int> > MaxBack(double** x, int n);
-extern vector <vector<int> > MinCut(double** x, int n);
+extern vector <vector <int>> MaxBack (double ** x, int dimension);
+extern vector <vector <int>> MinCut (double ** x, int dimension);
+
+double getCut (int vertex, double ** weight, int dimension);
+
+void getMaxBackValues (vector <int> &maxBackValues, vector <int> s, double ** weight, int dimension);
+
+int getMaximumMaxBack (vector <int> &maxBackValues, int dimension);
 
 #endif
 
