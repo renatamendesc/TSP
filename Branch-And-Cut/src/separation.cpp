@@ -12,7 +12,7 @@ int getMaximumMaxBack (vector <int> &maxBackValues, int dimension) {
         }
     }
 
-    return i;
+    return index;
 
 }
 
@@ -30,6 +30,7 @@ void getMaxBackValues (vector <int> &maxBackValues, vector <int> s, double ** we
 
         }
     }
+    
 }
 
 double getCut (int vertex, double ** weight, int dimension) {
@@ -43,7 +44,7 @@ double getCut (int vertex, double ** weight, int dimension) {
 
     }
 
-    cout << "CUT: " << cut << endl;
+    // cout << "CUT: " << cut << endl;
 
     return cut;
 
@@ -64,19 +65,28 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
         }
     }
 
-    vector <vector <int>> minCut;
-    vector <int> searched (dimension);
+    vector <vector <int>> sets;
+    vector <int> searched;
 
-    int iter = 0;
+    while (searched.size() != dimension) {
 
-    while (true) {
+        vector <int> sMin, s;
 
-        int vertex = iter;
+        int vertex = 0, counter = 0;
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < searched.size(); j++) {
+                if (i == searched[j]) {
 
-        vector <int> sMin;
+                    if (counter == 0) vertex = i;
+
+                    counter++;
+                }
+            }
+        }
+
         sMin.push_back(vertex);
 
-        vector <int> s = sMin;
+        s = sMin;
 
         double cutMin, cutValue;
 
@@ -90,20 +100,36 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
             int maximumMaxBack = getMaximumMaxBack(maxBackValues, dimension);
 
-            cutValue += 2 - 2 * maxBackValues(maximumMaxBack);
+            cutValue += 2 - 2 * maxBackValues[maximumMaxBack];
             s.push_back(maximumMaxBack);
 
-            // Continuar daqui
+            maxBackValues.clear();
+            getMaxBackValues(maxBackValues, s, weight, dimension);
+
+            if (cutValue < cutMin) {
+                cutMin = cutValue;
+                sMin = s;
+            }
 
         }
 
-        iter++;
+        if (sMin.size() == dimension) break;
 
-        break;
+        searched = sMin;
+        sets.push_back(sMin);
 
     }
 
-    return minCut;
+    cout << "Quantidade conjuntos: " << sets.size() << endl;
+
+    for (int i = 0; i < sets.size(); i++) {
+        cout << "Conjunto " << i << ": " << endl;
+        for (int j = 0; j < sets[i].size(); j++) {
+            cout << sets[i][j] << " " << endl;
+        }
+    }
+
+    return sets;
 
 }
 
