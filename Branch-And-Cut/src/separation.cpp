@@ -6,31 +6,41 @@ int getMaximumMaxBack (vector <int> &maxBackValues, int dimension) {
     int index;
 
     for (int i = 0; i < dimension; i++) {
+
+        // cout << maxBackValues[i] << endl;
+
         if (maxBackValues[i] > maximum) {
             maximum = maxBackValues[i];
             index = i;
         }
     }
 
-    return index;
+    cout << "MAIOR: " << maximum << endl;
 
+    return index;
 }
 
-void getMaxBackValues (vector <int> &maxBackValues, vector <int> s, double ** weight, int dimension) {
+void getMaxBackValues (vector <int> &maxBackValues, vector <int> &s, double ** weight, int dimension) {
 
     // Calcular os valores do peso para vertices que não pertencem a S
     for (int i = 0; i < dimension; i++) {
+
+        double maxBack = 0;
+
         for (int j = 0; j < s.size(); j++) {
 
-            if (i == s[j]) {
-                break;
+            if (i == s[j]) break;
+
+            for (int k = 0; k < s.size(); k++) {
+
+                if (i > k) maxBack += weight[k][i];
+                else if (i < k) maxBack += weight[i][k];
+                
             }
-
-            maxBackValues[i] = getCut(i, weight, dimension);
-
         }
+
+        maxBackValues[i] = maxBack;
     }
-    
 }
 
 double getCut (int vertex, double ** weight, int dimension) {
@@ -55,20 +65,21 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
     cout << "Max back" << endl;
 
     // Zera valores muito próximos a zero
-    for (int i = 0; i < dimension; i++) {
-        for (int j = 0; j < dimension; j++) {
 
-            // if (weight[i][j] < EPSILON && weight[i][j] > -EPSILON) {
-            //     weight[i][j] = 0;
-            // }
-
-        }
-    }
+    // for (int i = 0; i < dimension; i++) {
+    //     for (int j = 0; j < dimension; j++) {
+    //         if (weight[i][j] < EPSILON && weight[i][j] > -EPSILON) {
+    //             weight[i][j] = 0;
+    //         }
+    //     }
+    // }
 
     vector <vector <int>> sets;
     vector <int> searched;
 
     while (searched.size() != dimension) {
+
+        cout << "searched.size() != dimension" << endl;
 
         vector <int> sMin, s;
 
@@ -83,6 +94,8 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
                 }
             }
         }
+
+        cout << "vertice escolhido: " << vertex << endl;
 
         sMin.push_back(vertex);
 
@@ -106,6 +119,8 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
             maxBackValues.clear();
             getMaxBackValues(maxBackValues, s, weight, dimension);
 
+            // cout << "CutValue = " << cutValue << "; CutMin: " << cutMin << endl;
+
             if (cutValue < cutMin) {
                 cutMin = cutValue;
                 sMin = s;
@@ -113,7 +128,7 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
         }
 
-        if (sMin.size() == dimension) break;
+        // if (sMin.size() == dimension) break;
 
         searched = sMin;
         sets.push_back(sMin);
@@ -125,8 +140,9 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
     for (int i = 0; i < sets.size(); i++) {
         cout << "Conjunto " << i << ": " << endl;
         for (int j = 0; j < sets[i].size(); j++) {
-            cout << sets[i][j] << " " << endl;
+            cout << sets[i][j] << " ";
         }
+        cout << endl;
     }
 
     return sets;
