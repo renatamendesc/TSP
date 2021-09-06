@@ -118,38 +118,35 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
     vector <vector <int>> sets;
     vector <int> searched;
 
-    while (searched.size() != dimension) {
+    while (searched.size() < dimension) {
 
         vector <int> sMin, s;
 
-        int vertex = 0, counter = 0;
+        int vertex = 0;
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < searched.size(); j++) {
-                if (i == searched[j]) {
-
-                    if (counter == 0) vertex = i;
-
-                    counter++;
+                if (i != searched[j]) { 
+                    vertex = i;
+                    break;
                 }
             }
         }
 
         sMin.push_back(vertex);
-
         s = sMin;
 
-        double cutMin = getCut(s.front(), weight, dimension);
+        double cutMin = getCut (s.front(), weight, dimension);
         double cutValue = cutMin;
 
         vector <double> maxBackValues (dimension);
-        getMaxBackValues(maxBackValues, s, weight, dimension);
+        getMaxBackValues (maxBackValues, s, weight, dimension);
 
         while (s.size() < dimension) {
 
-            int maximumMaxBack = getMaximumMaxBack(maxBackValues, s, dimension);
+            int maximumMaxBack = getMaximumMaxBack (maxBackValues, s, dimension);
 
             cutValue += 2 - 2 * maxBackValues[maximumMaxBack];
-            s.push_back(maximumMaxBack);
+            s.push_back (maximumMaxBack);
 
             updateMaxBack (maxBackValues, maximumMaxBack, s, weight, dimension);
 
@@ -160,8 +157,16 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
         }
 
+        if (sMin.size() == dimension) break; 
+
         searched = sMin;
-        sets.push_back(sMin);
+        sets.push_back (sMin);
+
+        for (int i = 0; i < searched.size(); i++) {
+            cout << searched[i] << endl;
+        }
+
+        cout << endl;
 
         break;
 
@@ -233,6 +238,6 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
 
     }
 
-    return vetor;
+    return sets;
 
 }
