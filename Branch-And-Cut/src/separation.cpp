@@ -108,9 +108,7 @@ void updateMaxBack (vector <double> &maxBackValues, int maximumMaxBack, vector <
             else if (i < maximumMaxBack) maxBackValues[i] += weight[i][maximumMaxBack];
 
         }
-
     }
-
 }
 
 vector <vector <int>> MaxBack(double ** weight, int dimension) {
@@ -121,8 +119,6 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
     vector <int> searched;
 
     while (searched.size() != dimension) {
-
-        // cout << "searched.size() != dimension" << endl;
 
         vector <int> sMin, s;
 
@@ -138,16 +134,12 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
             }
         }
 
-        // cout << "vertice escolhido: " << vertex << endl;
-
         sMin.push_back(vertex);
 
         s = sMin;
 
-        double cutMin, cutValue;
-
-        cutMin = getCut(s.front(), weight, dimension);
-        cutValue = cutMin;
+        double cutMin = getCut(s.front(), weight, dimension);
+        double cutValue = cutMin;
 
         vector <double> maxBackValues (dimension);
         getMaxBackValues(maxBackValues, s, weight, dimension);
@@ -155,8 +147,6 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
         while (s.size() < dimension) {
 
             int maximumMaxBack = getMaximumMaxBack(maxBackValues, s, dimension);
-
-            // cout << "MAIOR: " << maximumMaxBack << endl;
 
             cutValue += 2 - 2 * maxBackValues[maximumMaxBack];
             s.push_back(maximumMaxBack);
@@ -186,14 +176,38 @@ double minCutPhase (vector <vector <int>> &V, double ** weight, int a, int dimen
     vector <int> A;
     A.push_back (a);
 
+    vector <double> weightSumValues (dimension);
+
     while (A.size() != V.size()) {
 
+        double maximum = __DBL_MIN__;
+        int index;
+
         // Calcular a soma dos pesos
+        for (int i = 0; i < dimension; i++) {
 
-        // verificar maior soma dos pesos
+            bool flag = false;
 
+            for (int j = 0; j < A.size(); j++) {
+                if (i == A[j]) {
+                    flag = true;
+                    break;
+                }
+            }
+
+            if (!flag) {
+
+                if (i > A[0]) weightSumValues[i] += weight[A[0]][i];
+                else if (i < A[0]) weightSumValues[i] += weight[i][A[0]];
+
+            }
+
+            // Verificar maior soma dos pesos
+            // Adicionar a A
+            // Calcular e retornar cut of phase
+
+        }
     }
-
 }
 
 vector <vector <int>> MinCut(double ** weight, int dimension) {
@@ -214,6 +228,8 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
     while (V.size() > 1) {
 
         double cutOfPhase = minCutPhase (V, weight, a, dimension);
+
+        // Fazer o merge entre s e t
 
     }
 
