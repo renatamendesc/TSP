@@ -115,7 +115,7 @@ void updateMaxBack (vector <double> &maxBackValues, int maximumMaxBack, vector <
 
 vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
-    cout << "Max back" << endl;
+    cout << "MAX BACK" << endl;
 
     vector <vector <int>> sets;
     vector <int> searched;
@@ -156,7 +156,7 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
             int maximumMaxBack = getMaximumMaxBack(maxBackValues, s, dimension);
 
-            cout << "MAIOR: " << maximumMaxBack << endl;
+            // cout << "MAIOR: " << maximumMaxBack << endl;
 
             cutValue += 2 - 2 * maxBackValues[maximumMaxBack];
             s.push_back(maximumMaxBack);
@@ -177,17 +177,22 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
     }
 
-    // cout << "Quantidade conjuntos: " << sets.size() << endl;
-
-    // for (int i = 0; i < sets.size(); i++) {
-    //     cout << "Conjunto " << i << ": " << endl;
-    //     for (int j = 0; j < sets[i].size(); j++) {
-    //         cout << sets[i][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
-
     return sets;
+
+}
+
+double minCutPhase (vector <vector <int>> &V, double ** weight, int a, int dimension) {
+
+    vector <int> A;
+    A.push_back (a);
+
+    while (A.size() != V.size()) {
+
+        // Calcular a soma dos pesos
+
+        // verificar maior soma dos pesos
+
+    }
 
 }
 
@@ -195,7 +200,22 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
 
     cout << "MIN CUT" << endl;
 
-    vector <vector <int>> vetor;
+    srand (time(NULL));
+    int a = rand() % dimension;
+
+    vector <vector <int>> V, sets;
+
+    for (int i = 0; i < dimension; i++) {
+
+        V.push_back ({i});
+
+    }
+
+    while (V.size() > 1) {
+
+        double cutOfPhase = minCutPhase (V, weight, a, dimension);
+
+    }
 
     return vetor;
 
