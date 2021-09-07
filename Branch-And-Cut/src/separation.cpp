@@ -152,9 +152,9 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
             int maximumMaxBack = getMaximumMaxBack (maxBackValues, s, dimension);
 
             cutValue += 2 - 2 * maxBackValues[maximumMaxBack];
-            s.push_back (maximumMaxBack);
 
             updateMaxBack (maxBackValues, maximumMaxBack, s, weight, dimension);
+            s.push_back (maximumMaxBack);
 
             if (cutValue < cutMin) {
                 cutMin = cutValue;
@@ -190,43 +190,43 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
 }
 
+void getWeightSum (vector <double> &weightSumValues, double ** weight, int dimension) {
+
+    int a = weightSumValues.front();
+
+    for (int i = 0; i < dimension; i++) {
+
+        if (i > a) weightSumValues[i] += weight[a][i];
+        else if (i < a) weightSumValues[i] += weight[i][a];
+
+    }
+
+}
+
 double minCutPhase (vector <vector <int>> &V, double ** weight, int a, int dimension) {
 
     vector <int> A;
     A.push_back (a);
 
     vector <double> weightSumValues (dimension);
+    getWeightSum (weightSumValues, weight, dimension); // Calculate weight
 
-    while (A.size() != V.size()) {
+    while (A.size() < V.size()) {
 
-        double maximum = __DBL_MIN__;
-        int index;
+        int tightVertex = getMaximumMaxBack (weightSumValues, A, dimension);
+        updateMaxBack (weightSumValues, thightVertex, A, weight, dimension);
+        A.push_back (tightVertex);
 
-        // Calcular a soma dos pesos
-        for (int i = 0; i < dimension; i++) {
-
-            bool flag = false;
-
-            for (int j = 0; j < A.size(); j++) {
-                if (i == A[j]) {
-                    flag = true;
-                    break;
-                }
-            }
-
-            if (!flag) {
-
-                if (i > A[0]) weightSumValues[i] += weight[A[0]][i];
-                else if (i < A[0]) weightSumValues[i] += weight[i][A[0]];
-
-            }
-
-            // Verificar maior soma dos pesos
-            // Adicionar a A
-            // Calcular e retornar cut of phase
-
-        }
     }
+
+    double cutOfPhase = getCut (tightVertex, weight, dimension); // Cut of vertex added last
+
+    return cutOfPhase;
+
+}
+
+void mergeVertices (vector <vector <int>> &V, double ** weight, int dimension) {
+
 }
 
 vector <vector <int>> MinCut(double ** weight, int dimension) {
@@ -239,9 +239,7 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
     vector <vector <int>> V, sets;
 
     for (int i = 0; i < dimension; i++) {
-
         V.push_back ({i});
-
     }
 
     while (V.size() > 1) {
@@ -249,6 +247,7 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
         double cutOfPhase = minCutPhase (V, weight, a, dimension);
 
         // Fazer o merge entre s e t
+        mergeVertices (V, weight, dimension);
 
     }
 
