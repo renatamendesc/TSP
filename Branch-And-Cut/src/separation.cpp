@@ -41,10 +41,7 @@ void getMaxBackValues (vector <double> &maxBackValues, vector <int> &s, double *
         for (int j = 0; j < s.size(); j++) {
 
             if (i == s[j]) {
-
                 flag = true;
-                maxBack = 0;
-
                 break;
             }
 
@@ -63,7 +60,7 @@ void getMaxBackValues (vector <double> &maxBackValues, vector <int> &s, double *
         }
 
         maxBackValues[i] = maxBack;
-        // cout << "Max Back de " << i << ": " << maxBackValues[i] << endl;
+
     }
 
 }
@@ -113,26 +110,35 @@ void updateMaxBack (vector <double> &maxBackValues, int maximumMaxBack, vector <
 
 vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
-    cout << "MAX BACK" << endl;
+    // cout << "MAX BACK" << endl;
 
     vector <vector <int>> sets;
     vector <int> searched;
+
+    int vertex, iter = 0;
 
     while (searched.size() < dimension) {
 
         vector <int> sMin, s;
 
-        int vertex = 0;
         for (int i = 0; i < dimension; i++) {
+            
+            bool flag = false;
+
             for (int j = 0; j < searched.size(); j++) {
-                if (i != searched[j]) { 
-                    vertex = i;
-                    break;
-                }
+
+                if (i == searched[j]) flag = true;
+                
             }
+
+            if (!flag) {
+                vertex = i;
+                break;
+            }
+
         }
 
-        sMin.push_back(vertex);
+        sMin.push_back (vertex);
         s = sMin;
 
         double cutMin = getCut (s.front(), weight, dimension);
@@ -159,16 +165,24 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
         if (sMin.size() == dimension) break; 
 
-        searched = sMin;
         sets.push_back (sMin);
 
-        for (int i = 0; i < searched.size(); i++) {
-            cout << searched[i] << endl;
+        for (int i = 0; i < sMin.size(); i++) {
+
+            bool flag = false;
+
+            for (int j = 0; j < searched.size(); j++) {
+                if (sMin[i] == searched[j]) {
+                    flag = true;
+                    break;
+                }
+            }
+
+            if (!flag) {
+                searched.push_back (sMin[i]);
+            }
+
         }
-
-        cout << endl;
-
-        break;
 
     }
 
