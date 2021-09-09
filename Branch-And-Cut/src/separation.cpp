@@ -203,9 +203,8 @@ void getWeightSum (vector <double> &weightSumValues, double ** weight, int dimen
 
 }
 
-double minCutPhase (vector <vector <int>> &V, double ** weight, int a, int dimension) {
+double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight, int a, int dimension) {
 
-    vector <int> A;
     A.push_back (a);
 
     vector <double> weightSumValues (dimension);
@@ -225,7 +224,14 @@ double minCutPhase (vector <vector <int>> &V, double ** weight, int a, int dimen
 
 }
 
-void mergeVertices (vector <vector <int>> &V, double ** weight, int dimension) {
+void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, int dimension) {
+
+    int s = A[A.size() - 1];
+    int t = A[A.size() - 2];
+
+    // for (int i = 0; i < dimension; i++) {
+
+    // }
 
 }
 
@@ -244,10 +250,12 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
 
     while (V.size() > 1) {
 
-        double cutOfPhase = minCutPhase (V, weight, a, dimension);
+        vector <int> A;
+
+        double cutOfPhase = minCutPhase (V, A, weight, a, dimension);
 
         // Fazer o merge entre s e t
-        mergeVertices (V, weight, dimension);
+        mergeVertices (V, A, weight, dimension);
 
     }
 
