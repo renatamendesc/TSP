@@ -210,10 +210,12 @@ double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight,
     vector <double> weightSumValues (dimension);
     getWeightSum (weightSumValues, weight, dimension); // Calculate weight
 
+    int tightVertex;
+
     while (A.size() < V.size()) {
 
-        int tightVertex = getMaximumMaxBack (weightSumValues, A, dimension);
-        updateMaxBack (weightSumValues, thightVertex, A, weight, dimension);
+        tightVertex = getMaximumMaxBack (weightSumValues, A, dimension);
+        updateMaxBack (weightSumValues, tightVertex, A, weight, dimension);
         A.push_back (tightVertex);
 
     }
@@ -229,9 +231,45 @@ void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, 
     int s = A[A.size() - 1];
     int t = A[A.size() - 2];
 
-    // for (int i = 0; i < dimension; i++) {
+    bool merged = false;
 
-    // }
+    // Merges s and t
+    for (int i = 0; i < V.size(); i++) {
+
+        if (s == V[i][0]) {
+
+            if (!merged) {
+
+                V[i].push_back (t);
+                merged = true;
+
+            } else {
+                V.erase (V.begin() + i);
+            }
+
+        } else if (t == V[i][0]) {
+
+            if (!merged) {
+
+                V[i].push_back (s);
+                merged = true;
+
+            } else {
+                V.erase (V.begin() + i);
+            }
+
+        }
+
+    }
+
+    if (s < t) weight[s][t] = 0;
+    else weight[t][s] = 0;
+
+    // Procura arestas que serão apagadas
+    for (int i = 0; i < V.size(); i++) {
+
+
+    }
 
 }
 
@@ -256,6 +294,8 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
 
         // Fazer o merge entre s e t
         mergeVertices (V, A, weight, dimension);
+
+        break;
 
     }
 
