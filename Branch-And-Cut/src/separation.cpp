@@ -239,10 +239,8 @@ void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, 
         if (s == V[i][0]) {
 
             if (!merged) {
-
                 V[i].push_back (t);
                 merged = true;
-
             } else {
                 V.erase (V.begin() + i);
             }
@@ -250,24 +248,21 @@ void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, 
         } else if (t == V[i][0]) {
 
             if (!merged) {
-
                 V[i].push_back (s);
                 merged = true;
-
             } else {
                 V.erase (V.begin() + i);
             }
 
         }
-
     }
 
     if (s < t) weight[s][t] = 0;
     else weight[t][s] = 0;
 
-    // Procura arestas que serão apagadas
     for (int i = 0; i < V.size(); i++) {
 
+        // Procura arestas que serão apagadas
 
     }
 
