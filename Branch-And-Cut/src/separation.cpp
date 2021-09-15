@@ -236,6 +236,7 @@ void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, 
     // Merges s and t
     for (int i = 0; i < V.size(); i++) {
 
+        // Elemento se junta ao conjunto do de menor índice
         if (s == V[i][0]) {
 
             if (!merged) {
@@ -243,6 +244,7 @@ void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, 
                 merged = true;
             } else {
                 V.erase (V.begin() + i);
+                break;
             }
 
         } else if (t == V[i][0]) {
@@ -252,17 +254,44 @@ void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, 
                 merged = true;
             } else {
                 V.erase (V.begin() + i);
+                break;
             }
 
         }
+
     }
 
-    if (s < t) weight[s][t] = 0;
-    else weight[t][s] = 0;
+    int smallIndex, bigIndex;
 
-    for (int i = 0; i < V.size(); i++) {
+    if (s < t) {
+        smallIndex = s;
+        bigIndex = t;
+    } else {
+        smallIndex = t;
+        bigIndex = s; 
+    }
 
-        // Procura arestas que serão apagadas
+    weight[smallIndex][bigIndex] = 0;
+
+    for (int i = 0; i < V.size(); i++) { // Procura arestas que serão apagadas
+
+        int vertex = V[i][0];
+
+        if (t != vertex) {
+
+            // Varia casos dependendo de qual o maior índice
+            if (vertex < smallIndex) {
+                weight[vertex][smallIndex] += weight[vertex][bigIndex];
+                weight[vertex][bigIndex] = 0;
+            } else if (vertex > smallIndex && vertex < bigIndex) {
+                weight[smallIndex][vertex] += weight[vertex][bigIndex];
+                weight[vertex][bigIndex] = 0;
+            } else if (vertex > bigIndex) {
+                weight[smallIndex][vertex] += weight[bigIndex][vertex];
+                weight[bigIndex][vertex] = 0;
+            }
+
+        }
 
     }
 
@@ -281,11 +310,17 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
         V.push_back ({i});
     }
 
+    double minCut = __DBL_MAX__;
+
     while (V.size() > 1) {
 
         vector <int> A;
 
         double cutOfPhase = minCutPhase (V, A, weight, a, dimension);
+
+        if (cutOfPhase < minCut) {
+            minCut = cutOfPhase;
+        }
 
         // Fazer o merge entre s e t
         mergeVertices (V, A, weight, dimension);
