@@ -110,7 +110,7 @@ void updateMaxBack (vector <double> &maxBackValues, int maximumMaxBack, vector <
 
 vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
-    // cout << "MAX BACK" << endl;
+    cout << "MAX BACK" << endl;
 
     vector <vector <int>> sets;
     vector <int> searched;
@@ -226,10 +226,7 @@ double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight,
 
 }
 
-void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, int dimension) {
-
-    int s = A[A.size() - 1];
-    int t = A[A.size() - 2];
+void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, int s, int t, int dimension) {
 
     bool merged = false;
 
@@ -261,40 +258,42 @@ void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, 
 
     }
 
-    int smallIndex, bigIndex;
-
-    if (s < t) {
-        smallIndex = s;
-        bigIndex = t;
-    } else {
-        smallIndex = t;
-        bigIndex = s; 
-    }
-
-    weight[smallIndex][bigIndex] = 0;
+    if (s < t) weight[s][t] = 0;
+    else weight[t][s] = 0;
 
     for (int i = 0; i < V.size(); i++) { // Procura arestas que serão apagadas
 
-        int vertex = V[i][0];
+        if (t != V[i][0]) {
 
-        if (t != vertex) {
+            // Varia casos dependendo de qual o maior indice
+            if (s < t) {
 
-            // Varia casos dependendo de qual o maior índice
-            if (vertex < smallIndex) {
-                weight[vertex][smallIndex] += weight[vertex][bigIndex];
-                weight[vertex][bigIndex] = 0;
-            } else if (vertex > smallIndex && vertex < bigIndex) {
-                weight[smallIndex][vertex] += weight[vertex][bigIndex];
-                weight[vertex][bigIndex] = 0;
-            } else if (vertex > bigIndex) {
-                weight[smallIndex][vertex] += weight[bigIndex][vertex];
-                weight[bigIndex][vertex] = 0;
+                if (V[i][0] < s) {
+                    weight[V[i][0]][s] += weight[V[i][0]][t];
+                    weight[V[i][0]][t] = 0;
+                } else if (V[i][0] > s && V[i][0] < t) {
+                    weight[s][V[i][0]] += weight[V[i][0]][t];
+                    weight[V[i][0]][t] = 0;
+                } else if (V[i][0] > t) {
+                    weight[s][V[i][0]] += weight[t][V[i][0]];
+                    weight[t][V[i][0]] = 0;
+                }
+
+            } else {
+
+                if (V[i][0] < t) {
+                    weight[V[i][0]][t] += weight[V[i][0]][s];
+                    weight[V[i][0]][s] = 0;
+                } else if (V[i][0] > t && V[i][0] < s) {
+                    weight[t][V[i][0]] += weight[V[i][0]][s];
+                    weight[V[i][0]][s] = 0;
+                } else if (V[i][0] > s) {
+                    weight[t][V[i][0]] += weight[s][V[i][0]];
+                    weight[s][V[i][0]] = 0;
+                }
             }
-
         }
-
     }
-
 }
 
 vector <vector <int>> MinCut(double ** weight, int dimension) {
@@ -305,12 +304,14 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
     int a = rand() % dimension;
 
     vector <vector <int>> V, sets;
+    vector <int> minCutSet;
 
     for (int i = 0; i < dimension; i++) {
         V.push_back ({i});
     }
 
     double minCut = __DBL_MAX__;
+    int cut;
 
     while (V.size() > 1) {
 
@@ -318,14 +319,34 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
 
         double cutOfPhase = minCutPhase (V, A, weight, a, dimension);
 
+        int s = A[A.size() - 1];
+        int t = A[A.size() - 2];
+
         if (cutOfPhase < minCut) {
             minCut = cutOfPhase;
+            cut = s;
+
+            for (int i = 0; i < V.size(); i++) {
+                if (cut == V[i][0]) {
+                    minCutSet = V[i];
+                    break;
+                }
+            }
         }
 
-        // Fazer o merge entre s e t
-        mergeVertices (V, A, weight, dimension);
+        // for (int i = 0; i < V.size(); i++) {
+        //     if (s == V[i][0]) {
+        //         minCutSet = V[i];
+        //         break;
+        //     }
+        // }
 
-        break;
+        sets.push_back(minCutSet);
+
+        // Fazer o merge entre s e t
+        mergeVertices (V, A, weight, s, t, dimension);
+
+        // break;
 
     }
 
