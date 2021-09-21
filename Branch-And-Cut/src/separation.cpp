@@ -226,7 +226,7 @@ double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight,
 
 }
 
-void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, int s, int t, int dimension) {
+void mergeVertices (vector <vector<int>> &V, double ** weight, int s, int t, int dimension) {
 
     bool merged = false;
 
@@ -253,9 +253,7 @@ void mergeVertices (vector <vector<int>> &V, vector <int> &A, double ** weight, 
                 V.erase (V.begin() + i);
                 break;
             }
-
         }
-
     }
 
     if (s < t) weight[s][t] = 0;
@@ -306,6 +304,12 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
     vector <vector <int>> V, sets;
     vector <int> minCutSet;
 
+    // for (int i = 0; i < dimension; i++) {
+    //     for (int j = i+1; j < dimension; j++) {
+    //         if (weight[i][j] < __DBL_EPSILON__ && weight[i][j] > -(__DBL_EPSILON__)) weight[i][j] = 0;
+    //     }
+    // }
+
     for (int i = 0; i < dimension; i++) {
         V.push_back ({i});
     }
@@ -322,32 +326,41 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
         int s = A[A.size() - 1];
         int t = A[A.size() - 2];
 
-        if (cutOfPhase < minCut) {
-            minCut = cutOfPhase;
-            cut = s;
-
-            for (int i = 0; i < V.size(); i++) {
-                if (cut == V[i][0]) {
-                    minCutSet = V[i];
-                    break;
-                }
+        for (int i = 0; i < V.size(); i++) {
+            if (s == V[i][0]) {
+                minCutSet = V[i];
+                break;
             }
         }
 
-        // for (int i = 0; i < V.size(); i++) {
-        //     if (s == V[i][0]) {
-        //         minCutSet = V[i];
-        //         break;
-        //     }
-        // }
+        if (cutOfPhase < 2 - EPSILON) {
 
-        sets.push_back(minCutSet);
+            if (minCutSet.size() <= dimension / 2) {
+                sets.push_back (minCutSet);
+            } else {
+                vector <int> aux;
+
+                for (int i = 0; i < dimension; i++) {
+
+                    bool found = false;
+                        
+                    for (int j = 0; minCutSet.size(); j++) {
+                        if (i == minCutSet[j]) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) aux.push_back (i); 
+                }
+
+                sets.push_back (aux);
+    
+            }
+        }
 
         // Fazer o merge entre s e t
-        mergeVertices (V, A, weight, s, t, dimension);
-
-        // break;
-
+        mergeVertices (V, weight, s, t, dimension);
     }
 
     return sets;
