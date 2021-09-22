@@ -91,10 +91,8 @@ void updateMaxBack (vector <double> &maxBackValues, int maximumMaxBack, vector <
         for (int j = 0; j < s.size(); j++) {
 
             if (i == s[j]) {
-
                 flag = true;
                 break;
-
             }
 
         }
@@ -190,29 +188,40 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
 }
 
-void getWeightSum (vector <double> &weightSumValues, double ** weight, int dimension) {
-
-    int a = weightSumValues.front();
-
-    for (int i = 0; i < dimension; i++) {
-
-        if (i > a) weightSumValues[i] += weight[a][i];
-        else if (i < a) weightSumValues[i] += weight[i][a];
-
-    }
-
-}
-
 double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight, int a, int dimension) {
 
-    A.push_back (a);
+    // cout << "MIN CUT PHASE" << endl;
 
-    vector <double> weightSumValues (dimension);
-    getWeightSum (weightSumValues, weight, dimension); // Calculate weight
+    A.push_back(a);
+
+    vector <double> weightSumValues(dimension);
+
+    // Calculate weight
+    for (int i = 0; i < dimension; i++) {
+
+        bool flag = false;
+
+        for (int j = 0; j < A.size(); j++) {
+
+            if (i == A[j]) {
+                flag = true;
+                break;
+            }
+
+        }
+
+        if (!flag) {
+            if (i > a) weightSumValues[i] += weight[a][i];
+            else if (i < a) weightSumValues[i] += weight[i][a];
+        }
+
+    }
 
     int tightVertex;
 
     while (A.size() < V.size()) {
+
+        // cout << A.size() << " < " << V.size() << endl;
 
         tightVertex = getMaximumMaxBack (weightSumValues, A, dimension);
         updateMaxBack (weightSumValues, tightVertex, A, weight, dimension);
@@ -221,6 +230,7 @@ double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight,
     }
 
     double cutOfPhase = getCut (tightVertex, weight, dimension); // Cut of vertex added last
+    cout << cutOfPhase << endl;
 
     return cutOfPhase;
 
@@ -304,24 +314,36 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
     vector <vector <int>> V, sets;
     vector <int> minCutSet;
 
-    // for (int i = 0; i < dimension; i++) {
-    //     for (int j = i+1; j < dimension; j++) {
-    //         if (weight[i][j] < __DBL_EPSILON__ && weight[i][j] > -(__DBL_EPSILON__)) weight[i][j] = 0;
-    //     }
-    // }
-
     for (int i = 0; i < dimension; i++) {
         V.push_back ({i});
     }
 
+    // /*
+    for(int i = 0; i < dimension; i++){
+        for(int j = i+1; j < dimension; j++){
+            if(weight[i][j] < __DBL_EPSILON__ && weight[i][j] > - __DBL_EPSILON__)
+                weight[i][j] = 0.0f;
+
+        }
+    }   
+    //*/
+
     double minCut = __DBL_MAX__;
     int cut;
 
+    // cout << "OI1" << endl;
+
     while (V.size() > 1) {
+
+        // cout << a << endl;
+
+        // cout << V.size() << " > 1" << endl; 
 
         vector <int> A;
 
         double cutOfPhase = minCutPhase (V, A, weight, a, dimension);
+
+        // cout << "OI2" << endl;
 
         int s = A[A.size() - 1];
         int t = A[A.size() - 2];
@@ -332,6 +354,8 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
                 break;
             }
         }
+
+        // cout << "OI3" << endl;
 
         if (cutOfPhase < 2 - EPSILON) {
 
@@ -344,7 +368,7 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
 
                     bool found = false;
                         
-                    for (int j = 0; minCutSet.size(); j++) {
+                    for (int j = 0; j < minCutSet.size(); j++) {
                         if (i == minCutSet[j]) {
                             found = true;
                             break;
@@ -355,12 +379,15 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
                 }
 
                 sets.push_back (aux);
-    
             }
         }
 
+        // cout << "OI4" << endl;
+
         // Fazer o merge entre s e t
         mergeVertices (V, weight, s, t, dimension);
+
+        // cout << "OI5" << endl;
     }
 
     return sets;
