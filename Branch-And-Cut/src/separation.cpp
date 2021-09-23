@@ -108,7 +108,7 @@ void updateMaxBack (vector <double> &maxBackValues, int maximumMaxBack, vector <
 
 vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
-    cout << "MAX BACK" << endl;
+    // cout << "MAX BACK" << endl;
 
     vector <vector <int>> sets;
     vector <int> searched;
@@ -190,8 +190,6 @@ vector <vector <int>> MaxBack(double ** weight, int dimension) {
 
 double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight, int a, int dimension) {
 
-    // cout << "MIN CUT PHASE" << endl;
-
     A.push_back(a);
 
     vector <double> weightSumValues(dimension);
@@ -214,7 +212,6 @@ double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight,
             if (i > a) weightSumValues[i] += weight[a][i];
             else if (i < a) weightSumValues[i] += weight[i][a];
         }
-
     }
 
     int tightVertex;
@@ -230,7 +227,7 @@ double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight,
     }
 
     double cutOfPhase = getCut (tightVertex, weight, dimension); // Cut of vertex added last
-    cout << cutOfPhase << endl;
+    // cout << cutOfPhase << endl;
 
     return cutOfPhase;
 
@@ -239,27 +236,19 @@ double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight,
 void mergeVertices (vector <vector<int>> &V, double ** weight, int s, int t, int dimension) {
 
     bool merged = false;
+    int index;
 
     // Merges s and t
     for (int i = 0; i < V.size(); i++) {
 
         // Elemento se junta ao conjunto do de menor índice
-        if (s == V[i][0]) {
+        if (s == V[i][0] || t == V[i][0]) {
 
             if (!merged) {
-                V[i].push_back (t);
+                index = i;
                 merged = true;
             } else {
-                V.erase (V.begin() + i);
-                break;
-            }
-
-        } else if (t == V[i][0]) {
-
-            if (!merged) {
-                V[i].push_back (s);
-                merged = true;
-            } else {
+                V[index].insert(V[index].end(), V[i].begin(), V[i].end()); // Adiciona vetor ao fim de outro vetor
                 V.erase (V.begin() + i);
                 break;
             }
@@ -306,7 +295,7 @@ void mergeVertices (vector <vector<int>> &V, double ** weight, int s, int t, int
 
 vector <vector <int>> MinCut(double ** weight, int dimension) {
 
-    cout << "MIN CUT" << endl;
+    // cout << "MIN CUT" << endl;
 
     srand (time(NULL));
     int a = rand() % dimension;
@@ -318,32 +307,14 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
         V.push_back ({i});
     }
 
-    // /*
-    for(int i = 0; i < dimension; i++){
-        for(int j = i+1; j < dimension; j++){
-            if(weight[i][j] < __DBL_EPSILON__ && weight[i][j] > - __DBL_EPSILON__)
-                weight[i][j] = 0.0f;
-
-        }
-    }   
-    //*/
-
     double minCut = __DBL_MAX__;
     int cut;
 
-    // cout << "OI1" << endl;
-
     while (V.size() > 1) {
-
-        // cout << a << endl;
-
-        // cout << V.size() << " > 1" << endl; 
 
         vector <int> A;
 
         double cutOfPhase = minCutPhase (V, A, weight, a, dimension);
-
-        // cout << "OI2" << endl;
 
         int s = A[A.size() - 1];
         int t = A[A.size() - 2];
@@ -355,39 +326,11 @@ vector <vector <int>> MinCut(double ** weight, int dimension) {
             }
         }
 
-        // cout << "OI3" << endl;
-
-        if (cutOfPhase < 2 - EPSILON) {
-
-            if (minCutSet.size() <= dimension / 2) {
-                sets.push_back (minCutSet);
-            } else {
-                vector <int> aux;
-
-                for (int i = 0; i < dimension; i++) {
-
-                    bool found = false;
-                        
-                    for (int j = 0; j < minCutSet.size(); j++) {
-                        if (i == minCutSet[j]) {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found) aux.push_back (i); 
-                }
-
-                sets.push_back (aux);
-            }
-        }
-
-        // cout << "OI4" << endl;
-
         // Fazer o merge entre s e t
         mergeVertices (V, weight, s, t, dimension);
 
-        // cout << "OI5" << endl;
+        if (cutOfPhase < 2 - EPSILON) sets.push_back (minCutSet);
+
     }
 
     return sets;

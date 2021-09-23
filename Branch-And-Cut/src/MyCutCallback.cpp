@@ -80,6 +80,8 @@ void MyCutCallback::main()
 			}
 			int RHS = cutSetPool[c].size();
 			cons.push_back(p <= RHS - 1);
+
+			p.end();
 		}
 		/*********** Adding the constraints to the model **********/
 		for(int i = 0; i < cons.size(); i++){
