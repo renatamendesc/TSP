@@ -1,40 +1,94 @@
 #include "separation.h"
 
-int getMaximumMaxBack (vector <double> &maxBackValues, vector <int> &s, int dimension) {
+/********************************************* MAX BACK FUNCTIONS *********************************************/
 
-    double maximum = __DBL_MIN__;
-    int index;
+vector <vector <int>> MaxBack(double ** weight, int dimension) { // Main function of max back heuristic
 
-    for (int i = 0; i < dimension; i++) {
+    vector <vector <int>> sets;
+    vector <int> searched, sMin, s;
 
-        bool flag = false;
+    int vertex;
 
-        // cout << maxBackValues[i] << " " << endl;
-        for (int j = 0; j < s.size(); j++) {
+    while (searched.size() < dimension) { // Until all vertices are added
 
-            if (i == s[j]) {
-                flag = true;
-                break;
+        vertex = findVertex(searched, dimension);
+
+        sMin.push_back(vertex);
+        s = sMin;
+
+        double cutMin = getCut(weight, s.front(), dimension); // Calculates cut of first vertex
+        double cutValue = cutMin;
+
+        vector <double> maxBackValues(dimension);
+        getMaxBackValues(maxBackValues, s, weight, dimension); // Calculates max back
+
+        while (s.size() < dimension) { // Adds vertices and update
+ 
+            int maximumMaxBack = getMaximumMaxBack(maxBackValues, s, dimension);
+
+            cutValue += 2 - 2 * maxBackValues[maximumMaxBack];
+            updateMaxBack(maxBackValues, s, weight, maximumMaxBack, dimension);
+            s.push_back(maximumMaxBack);
+
+            if (cutValue < cutMin) {
+                cutMin = cutValue;
+                sMin = s;
             }
-
         }
 
-        if (maxBackValues[i] > maximum && !flag) {
-            maximum = maxBackValues[i];
-            index = i;
-        }
+        if (sMin.size() == dimension) break; 
+        sets.push_back(sMin);
+
+        updateSearched(sMin, searched);
 
     }
 
-    return index;
+    return sets;
+}
+
+int findVertex (vector <int> &searched, int dimension) { // Finds first vertex that wasnt searched
+
+    int vertex;
+
+    for (int i = 0; i < dimension; i++) {
+            
+        bool flag = false;
+
+        for (int j = 0; j < searched.size(); j++) {
+
+            if (i == searched[j]) { 
+                flag = true;
+                break;
+            }  
+        }
+
+        if (!flag) {
+            vertex = i;
+            break;
+        }
+    }
+
+    return vertex;
+}
+
+double getCut (double ** weight, int vertex, int dimension) { // Calculates sum of weights to a single vertex
+
+    double cut = 0;
+
+    for (int i = 0; i < dimension; i++) {
+
+        if (i > vertex) cut += weight[vertex][i];
+        else if (i < vertex) cut += weight[i][vertex];
+    }
+
+    return cut;
 }
 
 void getMaxBackValues (vector <double> &maxBackValues, vector <int> &s, double ** weight, int dimension) {
 
-    // Calcular os valores do peso para vertices que não pertencem a S
+    // Sum of weights to vertices that doesnt belongs to S
     for (int i = 0; i < dimension; i++) {
 
-        double maxBack = 0;
         bool flag = false;
 
         // Verifies if vertex belongs to S
@@ -47,43 +101,23 @@ void getMaxBackValues (vector <double> &maxBackValues, vector <int> &s, double *
 
         }
 
-        // if vertex don't belong to S
         if (!flag) {
 
             for (int j = 0; j < s.size(); j++) {
 
-                if (i > s[j]) maxBack += weight[s[j]][i];
-                else if (i < s[j]) maxBack += weight[i][s[j]];
-
+                if (i > s[j]) maxBackValues[i] += weight[s[j]][i];
+                else if (i < s[j]) maxBackValues[i] += weight[i][s[j]];
             }
-
         }
-
-        maxBackValues[i] = maxBack;
-
     }
-
 }
 
-double getCut (int vertex, double ** weight, int dimension) {
+int getMaximumMaxBack (vector <double> &maxBackValues, vector <int> &s, int dimension) {
 
-    double cut = 0;
+    double maximum = __DBL_MIN__;
+    int index;
 
-    for (int i = 0; i < dimension; i++) {
-
-        if (i > vertex) cut += weight[vertex][i];
-        else if (i < vertex) cut += weight[i][vertex];
-
-    }
-
-    // cout << "CUT: " << cut << endl;
-
-    return cut;
-
-}
-
-void updateMaxBack (vector <double> &maxBackValues, int maximumMaxBack, vector <int> &s, double ** weight, int dimension) {
-
+    // Gets maximum max back value that does not belong to S
     for (int i = 0; i < dimension; i++) {
 
         bool flag = false;
@@ -94,93 +128,96 @@ void updateMaxBack (vector <double> &maxBackValues, int maximumMaxBack, vector <
                 flag = true;
                 break;
             }
+        }
 
+        if (maxBackValues[i] > maximum && !flag) {
+            maximum = maxBackValues[i];
+            index = i;
+        }
+    }
+
+    return index;
+}
+
+void updateMaxBack (vector <double> &maxBackValues, vector <int> &s, double ** weight, int maximumMaxBack, int dimension) {
+
+    // Updates max back values to new vertex added to S
+    for (int i = 0; i < dimension; i++) {
+
+        bool flag = false;
+
+        for (int j = 0; j < s.size(); j++) {
+
+            if (i == s[j]) {
+                flag = true;
+                break;
+            }
         }
 
         if (!flag) {
 
             if (i > maximumMaxBack) maxBackValues[i] += weight[maximumMaxBack][i];
             else if (i < maximumMaxBack) maxBackValues[i] += weight[i][maximumMaxBack];
-
         }
     }
 }
 
-vector <vector <int>> MaxBack(double ** weight, int dimension) {
+void updateSearched (vector <int> &s, vector <int> &searched) {
 
-    // cout << "MAX BACK" << endl;
+    // Updates searched with vertices added to S
+    for (int i = 0; i < s.size(); i++) {
 
-    vector <vector <int>> sets;
-    vector <int> searched;
+        bool flag = false;
 
-    int vertex, iter = 0;
-
-    while (searched.size() < dimension) {
-
-        vector <int> sMin, s;
-
-        for (int i = 0; i < dimension; i++) {
-            
-            bool flag = false;
-
-            for (int j = 0; j < searched.size(); j++) {
-
-                if (i == searched[j]) flag = true;
-                
-            }
-
-            if (!flag) {
-                vertex = i;
+        for (int j = 0; j < searched.size(); j++) {
+            if (s[i] == searched[j]) {
+                flag = true;
                 break;
             }
-
         }
 
-        sMin.push_back (vertex);
-        s = sMin;
+        if (!flag) {
+            searched.push_back(s[i]);
+        }
+    }
+}
 
-        double cutMin = getCut (s.front(), weight, dimension);
-        double cutValue = cutMin;
+/********************************************* MAX BACK FUNCTIONS *********************************************/
 
-        vector <double> maxBackValues (dimension);
-        getMaxBackValues (maxBackValues, s, weight, dimension);
+/********************************************* MIN CUT FUNCTIONS *********************************************/
 
-        while (s.size() < dimension) {
+vector <vector <int>> MinCut(double ** weight, int dimension) {
 
-            int maximumMaxBack = getMaximumMaxBack (maxBackValues, s, dimension);
+    srand (time(NULL));
+    int a = rand() % dimension; // Chooses random vertex
 
-            cutValue += 2 - 2 * maxBackValues[maximumMaxBack];
+    vector <vector <int>> V, sets;
+    vector <int> sMin;
 
-            updateMaxBack (maxBackValues, maximumMaxBack, s, weight, dimension);
-            s.push_back (maximumMaxBack);
+    for (int i = 0; i < dimension; i++) { // Creates set to each vertex
+        V.push_back ({i});
+    }
 
-            if (cutValue < cutMin) {
-                cutMin = cutValue;
-                sMin = s;
+    while (V.size() > 1) { // While theres more than 1 set
+
+        vector <int> A;
+
+        double cutOfPhase = minCutPhase(V, A, weight, a, dimension);
+
+        int s = A[A.size() - 1];
+        int t = A[A.size() - 2];
+
+        for (int i = 0; i < V.size(); i++) {
+            if (s == V[i][0]) {
+                sMin = V[i];
+                break;
             }
-
         }
 
-        if (sMin.size() == dimension) break; 
+        // Merges s and t
+        mergeVertices (V, weight, s, t, dimension);
 
-        sets.push_back (sMin);
-
-        for (int i = 0; i < sMin.size(); i++) {
-
-            bool flag = false;
-
-            for (int j = 0; j < searched.size(); j++) {
-                if (sMin[i] == searched[j]) {
-                    flag = true;
-                    break;
-                }
-            }
-
-            if (!flag) {
-                searched.push_back (sMin[i]);
-            }
-
-        }
+        if (cutOfPhase < 2 - EPSILON) sets.push_back (sMin);
 
     }
 
@@ -192,9 +229,9 @@ double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight,
 
     A.push_back(a);
 
-    vector <double> weightSumValues(dimension);
+    vector <double> weightSumValues(dimension); 
 
-    // Calculate weight
+    // Calculates weight
     for (int i = 0; i < dimension; i++) {
 
         bool flag = false;
@@ -218,19 +255,37 @@ double minCutPhase (vector <vector <int>> &V, vector <int> &A, double ** weight,
 
     while (A.size() < V.size()) {
 
-        // cout << A.size() << " < " << V.size() << endl;
+        double maximum = __DBL_MIN__;
+        int tightVertex;
 
-        tightVertex = getMaximumMaxBack (weightSumValues, A, dimension);
-        updateMaxBack (weightSumValues, tightVertex, A, weight, dimension);
-        A.push_back (tightVertex);
+        // Gets most tightly connected vertex
+        for (int i = 0; i < dimension; i++) {
+
+            bool flag = false;
+
+            for (int j = 0; j < A.size(); j++) {
+
+                if (i == A[j]) {
+                    flag = true;
+                    break;
+                }
+            }
+
+            if (weightSumValues[i] > maximum && !flag) {
+                maximum = weightSumValues[i];
+                tightVertex = i;
+            }
+        }
+
+        // Adds on set
+        updateMaxBack(weightSumValues, A, weight, tightVertex, dimension);
+        A.push_back(tightVertex);
 
     }
 
-    double cutOfPhase = getCut (tightVertex, weight, dimension); // Cut of vertex added last
-    // cout << cutOfPhase << endl;
+    double cutOfPhase = getCut(weight, tightVertex, dimension); // Cut of vertex added last
 
     return cutOfPhase;
-
 }
 
 void mergeVertices (vector <vector<int>> &V, double ** weight, int s, int t, int dimension) {
@@ -241,15 +296,14 @@ void mergeVertices (vector <vector<int>> &V, double ** weight, int s, int t, int
     // Merges s and t
     for (int i = 0; i < V.size(); i++) {
 
-        // Elemento se junta ao conjunto do de menor índice
         if (s == V[i][0] || t == V[i][0]) {
 
             if (!merged) {
                 index = i;
                 merged = true;
             } else {
-                V[index].insert(V[index].end(), V[i].begin(), V[i].end()); // Adiciona vetor ao fim de outro vetor
-                V.erase (V.begin() + i);
+                V[index].insert(V[index].end(), V[i].begin(), V[i].end()); // Adds vector in the end of another vector
+                V.erase(V.begin() + i);
                 break;
             }
         }
@@ -258,11 +312,10 @@ void mergeVertices (vector <vector<int>> &V, double ** weight, int s, int t, int
     if (s < t) weight[s][t] = 0;
     else weight[t][s] = 0;
 
-    for (int i = 0; i < V.size(); i++) { // Procura arestas que serão apagadas
+    for (int i = 0; i < V.size(); i++) { // Searches edges to be deleted
 
         if (t != V[i][0]) {
 
-            // Varia casos dependendo de qual o maior indice
             if (s < t) {
 
                 if (V[i][0] < s) {
@@ -293,46 +346,4 @@ void mergeVertices (vector <vector<int>> &V, double ** weight, int s, int t, int
     }
 }
 
-vector <vector <int>> MinCut(double ** weight, int dimension) {
-
-    // cout << "MIN CUT" << endl;
-
-    srand (time(NULL));
-    int a = rand() % dimension;
-
-    vector <vector <int>> V, sets;
-    vector <int> minCutSet;
-
-    for (int i = 0; i < dimension; i++) {
-        V.push_back ({i});
-    }
-
-    double minCut = __DBL_MAX__;
-    int cut;
-
-    while (V.size() > 1) {
-
-        vector <int> A;
-
-        double cutOfPhase = minCutPhase (V, A, weight, a, dimension);
-
-        int s = A[A.size() - 1];
-        int t = A[A.size() - 2];
-
-        for (int i = 0; i < V.size(); i++) {
-            if (s == V[i][0]) {
-                minCutSet = V[i];
-                break;
-            }
-        }
-
-        // Fazer o merge entre s e t
-        mergeVertices (V, weight, s, t, dimension);
-
-        if (cutOfPhase < 2 - EPSILON) sets.push_back (minCutSet);
-
-    }
-
-    return sets;
-
-}
+/********************************************* MIN CUT FUNCTIONS *********************************************/
