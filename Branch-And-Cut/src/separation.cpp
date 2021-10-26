@@ -308,7 +308,7 @@ void mergeVertices (vector <vector<int>> &V, double ** weight, int s, int t, int
             }
         }
     }
-
+    
     if (s < t) weight[s][t] = 0;
     else weight[t][s] = 0;
 
